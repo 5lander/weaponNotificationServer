@@ -18,11 +18,20 @@ from django.urls import path, include
 from django.conf.urls.static import static
 from django.conf import settings
 from django.conf.urls import url
+from django.http import HttpResponse
+from django.db import connections
+from django.db.utils import OperationalError
 
+def health_check(request):
+    try:
+        connections['default'].ensure_connection()
+        return HttpResponse("OK", status=200)
+    except OperationalError:
+        return HttpResponse("Database unavailable", status=503)
 
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('', include('detection.urls')),
     url(r'^api/', include(('alertuploadREST.urls', 'alertuploadREST'), namespace='api')),
+    path('health/', health_check, name='health_check'),  # Añade esta línea
 ]+ static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
-
