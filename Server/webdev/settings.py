@@ -37,7 +37,7 @@ if not SECRET_KEY:
 #print("All environment variables:", os.environ)
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = False
 
 ALLOWED_HOSTS = ['weapondetectionsystem.onrender.com']
 

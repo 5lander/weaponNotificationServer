@@ -65,12 +65,24 @@ def send_sms(serializer):
                                     to=serializer.data['alertReceiver'])
 
 def prepare_alert_message(serializer):
-    uuid_with_slashes = split(serializer.data['image'], ".")
-    uuid = split(uuid_with_slashes[3], "/")
-
-    url = 'https://weapondetectionsystem.onrender.com/alert' + uuid[2]
-
-    return 'Weapon Detected! View alert at ' + url
+    try:
+        # Dividir por puntos
+        parts = serializer.data['image'].split('.')
+        
+        # Obtener la parte que contiene el UUID
+        uuid_part = parts[-2]  # Tomamos el penúltimo elemento
+        
+        # Obtener el UUID (última parte después del último /)
+        uuid = uuid_part.split('/')[-1]
+        
+        # Construir la URL asegurándonos de incluir el '/'
+        url = f'https://weapondetectionsystem.onrender.com/alert/{uuid}'
+        
+        return f'Weapon Detected! View alert at {url}'
+    
+    except Exception as e:
+        print(f"Error processing URL: {str(e)}")  # Para debugging
+        return "Weapon Detected! Please check the system dashboard."
 
 def split(value, key):
-    return str(value).split(key) 
+    return str(value).split(key)
