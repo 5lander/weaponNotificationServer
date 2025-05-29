@@ -38,8 +38,6 @@ db.sqlite3
 # Media
 /media
 
-# Static files
-/static
 
 # Jupyter Notebook
 .ipynb_checkpoints
