@@ -33,8 +33,7 @@ mccabe==0.6.1
 multidict==6.0.5; python_version >= '3.7'
 mysqlclient==2.0.3; python_version >= '3.5'
 pillow==10.4.0; python_version >= '3.6'
-psycopg2==2.9.9; python_version >= '3.7'
-psycopg2-binary==2.9.9; python_version >= '3.7'
+psycopg2-binary==2.9.10; python_version >= '3.7'
 py-vapid==1.9.1
 pycparser==2.22; python_version >= '3.8'
 pydotplus==2.0.2
