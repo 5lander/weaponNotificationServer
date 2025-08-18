@@ -2,64 +2,147 @@
 
 <!DOCTYPE html>
 <html>
-    
 <head>
-	<title>Alert</title>
-	<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css" integrity="sha384-MCw98/SFnGE8fJT3GXwEOngsV7Zt27NXFoaoApmYm81iuXoPkFOJwJ8ERdknLPMO" crossorigin="anonymous">
-	<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
-	<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.6.1/css/all.css" integrity="sha384-gfdkjb5BdAXd+lj+gudLWI+BXq4IuLW5IT+brZEZsLFm++aCMlF1V92rMkPaX4PP" crossorigin="anonymous">
-	<link rel="stylesheet" type="text/css" href="{% static '/css/alert.css' %}">
-	<link rel="stylesheet" type="text/css" href="{% static '/css/navbar.css' %}">
-	<link rel="stylesheet" type="text/css" href="{% static '/css/util.css' %}">
-
-
+  <meta charset="utf-8">
+  <title>Weapon Detection System - Alert Details</title>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+  <meta name="csrf-token" content="{{ csrf_token }}">
+  
+  <!-- Cargar el archivo CSS específico de alertas -->
+  <link rel="stylesheet" href="{% static 'css/alert.css' %}">
 </head>
+
 <body>
+  <!-- Incluir el navbar moderno -->
+  {% include 'detection/navbar.html' %}
 
-	<nav class="navbar navbar-dark bg-dark justify-content-between">
-		<a class="navbar-brand" href="{% url 'home' %}" style="margin-left: 45px;">Weapon Detection System</a>	  
-	</nav>
-	
-<div class="limiter">
-<div class="container-login100 p-t-15">
-<div class="wrap-login100 p-l-40 p-r-40 p-t-25 p-b-15">
+  <div class="alert-root">
+    <!-- Animated Background -->
+    <div class="alert-background">
+      <div class="alert-background-grid">
+        <div class="bg-element" style="grid-area: top / start / 8 / end;">
+          <div style="background: linear-gradient(rgba(15, 23, 42, 0.8) 0%, rgba(30, 41, 59, 0.9) 33%); height: 100%;"></div>
+        </div>
+        <div class="bg-element bg-border animate-left" style="grid-area: 4 / 2 / auto / 5;"></div>
+        <div class="bg-element bg-dark" style="grid-area: 6 / start / auto / 2;"></div>
+        <div class="bg-element bg-blue animate-left" style="grid-area: 7 / start / auto / 4;"></div>
+        <div class="bg-element bg-gray animate-left" style="grid-area: 8 / 4 / auto / 6;"></div>
+        <div class="bg-element bg-cyan animate-right" style="grid-area: 2 / 15 / auto / end;"></div>
+        <div class="bg-element bg-blue animate-right" style="grid-area: 3 / 14 / auto / end;"></div>
+        <div class="bg-element bg-gray animate-right" style="grid-area: 4 / 17 / auto / 20;"></div>
+        <div class="bg-element bg-border animate-right" style="grid-area: 5 / 14 / auto / 17;"></div>
+      </div>
+    </div>
 
-	<table class="table">
-		<tr>
-			<th scope="col" class="top-row">Detection</th>
-		</tr>
+    <!-- Alert Content -->
+    <div class="alert-container">
+      <!-- Back Button -->
+      <a href="{% url 'home' %}" class="back-btn">
+        <i class="fas fa-arrow-left"></i>
+        Back to Dashboard
+      </a>
 
-		{% for alert in uploadAlert %}
+      <!-- Alert Header -->
+      <div class="alert-header">
+        <h1 class="alert-title">
+          <i class="fas fa-exclamation-triangle"></i>
+          Weapon Detection Alert
+        </h1>
+        <span class="alert-status">
+          <i class="fas fa-shield-alt"></i>
+          ACTIVE THREAT DETECTED
+        </span>
+      </div>
 
-		<tr>
-			<td class="w-25"><img class="img-fluid" src='https://weapondetectionsystem.s3.us-east-1.amazonaws.com/media/{{alert.image}}'/></td>
-		</tr>
-		{% endfor %}
-	</table>
+      <!-- Content Grid -->
+      <div class="content-grid">
+        <!-- Image Section -->
+        <div class="image-card">
+          <h2 class="image-header">
+            <i class="fas fa-camera"></i>
+            Detection Evidence
+          </h2>
+          {% for alert in uploadAlert %}
+          <img class="detection-image-large" 
+               src='https://weapondetectionsystem.s3.us-east-1.amazonaws.com/media/{{alert.image}}' 
+               alt="Weapon Detection Evidence"/>
+          <p class="image-caption">Weapon detected in security footage - {{ alert.dateCreated|date:"F j, Y at g:i A" }}</p>
+          {% endfor %}
+        </div>
 
-			<table class="table">
-				<tr>
-					<th scope="col" class="top-row">Location</th>
-					<th scope="col" class="top-row">Alert was sent to</th>
-					<th scope="col" class="top-row">Time</th>
-				</tr>
+        <!-- Info Section -->
+        <div class="info-card">
+          <h2 class="info-header">
+            <i class="fas fa-info-circle"></i>
+            Alert Details
+          </h2>
+          
+          <table class="info-table">
+            {% for alert in uploadAlert %}
+            <tr>
+              <td class="info-label">Location</td>
+              <td class="info-value location-value">
+                <i class="fas fa-map-marker-alt"></i>
+                {{ alert.location }}
+              </td>
+            </tr>
+            <tr>
+              <td class="info-label">Alert Sent To</td>
+              <td class="info-value receiver-value">
+                <i class="fas fa-user-shield"></i>
+                {{ alert.alertReceiver }}
+              </td>
+            </tr>
+            <tr>
+              <td class="info-label">Detection Time</td>
+              <td class="info-value time-value">
+                <i class="fas fa-clock"></i>
+                {{ alert.dateCreated|date:"Y-m-d H:i:s" }}
+              </td>
+            </tr>
+            <tr>
+              <td class="info-label">Alert Status</td>
+              <td class="info-value">
+                <i class="fas fa-exclamation-circle" style="color: #ef4444;"></i>
+                <span id="alertStatus">Active Monitoring</span>
+              </td>
+            </tr>
+            {% endfor %}
+          </table>
+        </div>
+      </div>
 
-				{% for alert in uploadAlert %}
+      <!-- Actions Section -->
+      <div class="actions-section">
+        <h3 class="actions-title">Available Actions</h3>
+        <div class="actions-buttons">
+          <button onclick="downloadReport()" class="action-btn">
+            <i class="fas fa-download"></i>
+            Download Report
+          </button>
+          <button onclick="archiveAlert()" class="action-btn danger" id="archiveBtn">
+            <i class="fas fa-archive"></i>
+            Archive Alert
+          </button>
+        </div>
+        
+        <!-- Status Messages -->
+        <div id="statusMessage" class="status-message" style="display: none;">
+          <i class="fas fa-check-circle"></i>
+          <span id="statusText"></span>
+        </div>
+      </div>
+    </div>
+  </div>
 
-				<tr>
-					<td>{{alert.location}}</td>
-					<td>{{alert.alertReceiver}}</td>
-					<td>{{alert.dateCreated|date:"Y-m-d H:i:s"}}</td>
-					
-				</tr>
-				{% endfor %}
+  <!-- Incluir el footer -->
+  {% include 'detection/footer.html' %}
 
-			</table>
-		
-</div>
-</div>
-</div>
+  <!-- JavaScript externo sería mejor separarlo también -->
+  <script src="{% static 'js/alert.js' %}"></script>
 
+  <!-- CSRF Token para formularios -->
+  {% csrf_token %}
 </body>
-
 </html>

@@ -19,9 +19,9 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
 dotenv_file = os.path.join(BASE_DIR, ".env")
 if os.path.isfile(dotenv_file):
-    dotenv.load_dotenv(dotenv_file) 
-
-
+    load_dotenv(dotenv_file)  # ← Cambiar dotenv.load_dotenv por load_dotenv
+else:
+    load_dotenv()
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/3.1/howto/deployment/checklist/
 
@@ -37,9 +37,9 @@ if not SECRET_KEY:
 #print("All environment variables:", os.environ)
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = False
+DEBUG = True
 
-ALLOWED_HOSTS = ['weaponnotificationserver.onrender.com']
+ALLOWED_HOSTS = ['weapondetectionsystem.onrender.com', '127.0.0.1', 'localhost']
 
 
 # Application definition
@@ -154,42 +154,19 @@ os.makedirs(LOG_DIR, exist_ok=True)
 LOGGING = {
     'version': 1,
     'disable_existing_loggers': False,
-    'formatters': {
-        'verbose': {
-            'format': '{levelname} {asctime} {module} {process:d} {thread:d} {message}',
-            'style': '{',
-        },
-    },
     'handlers': {
-        'console': {
-            'level': 'INFO',
-            'class': 'logging.StreamHandler',
-            'formatter': 'verbose',
-        },
         'file': {
             'level': 'INFO',
-            'class': 'logging.handlers.TimedRotatingFileHandler',
-            'filename': os.path.join(LOG_DIR, 'django.log'),
-            'when': 'midnight',
-            'backupCount': 30,  # Mantiene logs de los últimos 30 días
-            'formatter': 'verbose',
+            'class': 'logging.FileHandler',  # Cambiar a FileHandler simple
+            'filename': os.path.join(BASE_DIR, 'logs', 'django.log'),
         },
     },
     'loggers': {
         'django': {
-            'handlers': ['console', 'file'],
+            'handlers': ['file'],
             'level': 'INFO',
             'propagate': True,
         },
-        'django.db.backends': {
-            'handlers': ['console', 'file'],
-            'level': 'INFO',
-            'propagate': False,
-        },
-    },
-    'root': {
-        'handlers': ['console', 'file'],
-        'level': 'INFO',
     },
 }
 

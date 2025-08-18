@@ -1,0 +1,98 @@
+{% load static %}
+
+<!-- footer.html - Componente reutilizable limpio -->
+<!-- Cargar CSS del footer -->
+<link rel="stylesheet" href="{% static 'css/footer.css' %}">
+
+<footer class="modern-footer">
+  <div class="footer-glow"></div>
+  
+  <div class="footer-container">
+    <div class="footer-content">
+      <!-- Sección del Sistema -->
+      <div class="footer-section">
+        <h3 class="footer-title">
+          <i class="fas fa-shield-alt"></i>
+          Weapon Detection System
+        </h3>
+        <p class="footer-text">
+          Advanced AI-powered security system for real-time weapon detection and threat assessment. 
+          Enhancing safety through intelligent monitoring and rapid response capabilities.
+        </p>
+        <div class="tech-stack">
+          <span class="tech-badge">Django</span>
+          <span class="tech-badge">Python</span>
+          <span class="tech-badge">AI/ML</span>
+          <span class="tech-badge">Computer Vision</span>
+        </div>
+      </div>
+
+      <!-- Sección de Enlaces -->
+      <div class="footer-section">
+        <h3 class="footer-title">
+          <i class="fas fa-link"></i>
+          Quick Links
+        </h3>
+        <a href="{% url 'home' %}" class="footer-link">
+          <i class="fas fa-home"></i>
+          Dashboard
+        </a>
+        <a href="#" class="footer-link">
+          <i class="fas fa-chart-line"></i>
+          Analytics
+        </a>
+        <a href="#" class="footer-link">
+          <i class="fas fa-cog"></i>
+          Settings
+        </a>
+        <a href="#" class="footer-link">
+          <i class="fas fa-question-circle"></i>
+          Help & Support
+        </a>
+        <a href="#" class="footer-link">
+          <i class="fas fa-file-alt"></i>
+          Documentation
+        </a>
+      </div>
+
+      <!-- Sección de la Universidad -->
+      <div class="footer-section">
+        <div class="university-info">
+          <div class="university-logo">
+            <i class="fas fa-university"></i>
+            <div>
+              <div class="university-name">Universidad Internacional del Ecuador</div>
+              <div class="university-description">UIDE - Excelencia Académica</div>
+            </div>
+          </div>
+          
+          <div class="project-info">
+            <div class="project-title">Academic Project</div>
+            <div class="project-description">
+              This system was developed as part of an academic research project focused on 
+              artificial intelligence applications in security and surveillance systems.
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Footer Bottom -->
+    <div class="footer-bottom">
+      <div class="copyright">
+        <i class="fas fa-copyright"></i>
+        <span>{{ current_year|default:"2024" }} Universidad Internacional del Ecuador (UIDE). All rights reserved.</span>
+      </div>
+      
+      <div class="footer-links">
+        <a href="#">Privacy Policy</a>
+        <a href="#">Terms of Service</a>
+        <a href="#">Contact</a>
+        <a href="#">About UIDE</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<!-- Cargar JavaScript del footer -->
+<script src="{% static 'js/footer.js' %}"></script>

@@ -12,6 +12,7 @@ from .models import UploadAlert
 
 from rest_framework.authtoken.models import Token
 from django.conf import settings
+from django.core.paginator import Paginator
 
 
 
@@ -58,14 +59,38 @@ def logoutUser(request):
 
 @login_required(login_url='login')
 def home(request):
+    # Obtener el token del usuario
     token = Token.objects.get(user=request.user)
-    uploadAlert = UploadAlert.objects.filter(userID=token)
-
-
+    
+    # Obtener todas las alertas del usuario ordenadas por fecha (más reciente primero)
+    uploadAlert = UploadAlert.objects.filter(userID=token).order_by('-dateCreated')
+    
+    # Aplicar filtros
     myFilter = DetectionFilter(request.GET, queryset=uploadAlert)
-    uploadAlert = myFilter.qs 
-
-    context = {'myFilter':myFilter, 'uploadAlert':uploadAlert}
+    uploadAlert = myFilter.qs
+    
+    # Configurar paginación
+    per_page = request.GET.get('per_page', 10)  # 10 elementos por página por defecto
+    try:
+        per_page = int(per_page)
+        # Validar que per_page esté en los valores permitidos
+        if per_page not in [10, 25, 50, 100]:
+            per_page = 10
+    except (ValueError, TypeError):
+        per_page = 10
+    
+    # Crear el paginador
+    paginator = Paginator(uploadAlert, per_page)
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
+    
+    # Contexto para el template
+    context = {
+        'myFilter': myFilter,
+        'uploadAlert': page_obj,  # Ahora es un objeto paginado
+        'total_results': paginator.count,  # Total de resultados
+    }
+    
     return render(request, 'detection/dashboard.html', context)
 
 

@@ -1,16 +1,302 @@
-  
 {% load static %}
 
-<link rel="stylesheet" type="text/css" href="{% static '/css/navbar.css' %}">
-<link rel="stylesheet" type="text/css" href="{% static '/css/util.css' %}">
+<!-- navbar.html - Componente separado -->
+<style>
+  /* Estilos específicos del navbar */
+  .modern-navbar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 1000;
+    background: rgba(15, 23, 42, 0.95);
+    backdrop-filter: blur(20px);
+    border-bottom: 1px solid rgba(59, 130, 246, 0.2);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+    padding: 1rem 0;
+    transition: all 0.3s ease;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, Segoe UI, Roboto, sans-serif;
+  }
 
-<nav class="navbar navbar-dark bg-dark justify-content-between">
-    <span class="navbar-brand" style="margin-left: 45px;">Weapon Detection System</span>
+  .modern-navbar.scrolled {
+    background: rgba(15, 23, 42, 0.98);
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+  }
 
-    <ul class="form-inline my-2 my-lg-0">
-      <span class="hello-msg">Hello, {{request.user}}!</span>
-      <span ><a class="hello-msg" href="{% url 'logout' %}">Logout</a></span>
+  .navbar-container {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 0 2rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .navbar-brand {
+    color: white !important;
+    font-size: 1.5rem;
+    font-weight: 700;
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    transition: all 0.3s ease;
+  }
+
+  .navbar-brand:hover {
+    color: #60a5fa !important;
+    text-decoration: none;
+    transform: translateY(-1px);
+  }
+
+  .navbar-brand i {
+    color: #3b82f6;
+    font-size: 1.75rem;
+    transition: all 0.3s ease;
+  }
+
+  .navbar-brand:hover i {
+    color: #60a5fa;
+    transform: rotate(5deg) scale(1.1);
+  }
+
+  .navbar-menu {
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+
+  .user-greeting {
+    color: rgba(255, 255, 255, 0.8);
+    font-size: 0.95rem;
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem 1rem;
+    background: rgba(59, 130, 246, 0.1);
+    border-radius: 25px;
+    border: 1px solid rgba(59, 130, 246, 0.2);
+    transition: all 0.3s ease;
+  }
+
+  .user-greeting:hover {
+    background: rgba(59, 130, 246, 0.15);
+    border-color: rgba(59, 130, 246, 0.3);
+  }
+
+  .user-greeting i {
+    color: #3b82f6;
+    font-size: 1rem;
+  }
+
+  .logout-btn {
+    color: white !important;
+    text-decoration: none;
+    font-weight: 600;
+    font-size: 0.9rem;
+    padding: 0.6rem 1.2rem;
+    background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+    border-radius: 25px;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    border: 2px solid transparent;
+  }
+
+  .logout-btn:hover {
+    color: white !important;
+    text-decoration: none;
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(239, 68, 68, 0.4);
+    border-color: rgba(255, 255, 255, 0.1);
+  }
+
+  .logout-btn i {
+    font-size: 0.85rem;
+    transition: transform 0.3s ease;
+  }
+
+  .logout-btn:hover i {
+    transform: translateX(2px);
+  }
+
+  /* Espaciado para el contenido debajo del navbar */
+  .navbar-spacer {
+    height: 80px;
+  }
+
+  /* Responsive */
+  @media (max-width: 768px) {
+    .navbar-container {
+      padding: 0 1rem;
+    }
+    
+    .navbar-brand {
+      font-size: 1.25rem;
+    }
+    
+    .navbar-brand i {
+      font-size: 1.5rem;
+    }
+    
+    .navbar-menu {
+      gap: 1rem;
+    }
+    
+    .user-greeting {
+      font-size: 0.85rem;
+      padding: 0.4rem 0.8rem;
+    }
+    
+    .logout-btn {
+      font-size: 0.85rem;
+      padding: 0.5rem 1rem;
+    }
+  }
+
+  @media (max-width: 480px) {
+    .navbar-container {
+      flex-direction: column;
+      gap: 1rem;
+      padding: 1rem;
+    }
+    
+    .navbar-spacer {
+      height: 120px;
+    }
+    
+    .navbar-menu {
+      width: 100%;
+      justify-content: center;
+    }
+    
+    .user-greeting {
+      display: none; /* Ocultar saludo en móviles muy pequeños */
+    }
+  }
+
+  /* Animación de entrada */
+  @keyframes slideDown {
+    from {
+      transform: translateY(-100%);
+      opacity: 0;
+    }
+    to {
+      transform: translateY(0);
+      opacity: 1;
+    }
+  }
+
+  .modern-navbar {
+    animation: slideDown 0.5s ease-out;
+  }
+
+  /* Efecto glow sutil */
+  .modern-navbar::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(90deg, 
+      transparent 0%, 
+      rgba(59, 130, 246, 0.1) 50%, 
+      transparent 100%);
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    pointer-events: none;
+  }
+
+  .modern-navbar:hover::before {
+    opacity: 1;
+  }
+</style>
+
+<nav class="modern-navbar" id="modernNavbar">
+  <div class="navbar-container">
+    <a href="#" class="navbar-brand">
+      <i class="fas fa-shield-alt"></i>
+      Weapon Detection System
+    </a>
+    
+    <ul class="navbar-menu">
+      <li class="user-greeting">
+        <i class="fas fa-user-circle"></i>
+        Hello, {{ request.user }}!
+      </li>
+      <li>
+        <a class="logout-btn" href="{% url 'logout' %}">
+          <i class="fas fa-sign-out-alt"></i>
+          Logout
+        </a>
+      </li>
     </ul>
+  </div>
+</nav>
 
-  
-  </nav>
+<!-- Espaciador para que el contenido no quede detrás del navbar -->
+<div class="navbar-spacer"></div>
+
+<script>
+  // Efecto de scroll para el navbar
+  document.addEventListener('DOMContentLoaded', function() {
+    const navbar = document.getElementById('modernNavbar');
+    
+    window.addEventListener('scroll', function() {
+      if (window.scrollY > 50) {
+        navbar.classList.add('scrolled');
+      } else {
+        navbar.classList.remove('scrolled');
+      }
+    });
+
+    // Variable para controlar navegación interna
+    let isInternalNavigation = false;
+
+    // Detectar navegación interna
+    const internalLinks = document.querySelectorAll('a[href^="/"], a[href*="{% url"]');
+    internalLinks.forEach(link => {
+        link.addEventListener('click', function() {
+            isInternalNavigation = true;
+            setTimeout(() => {
+                isInternalNavigation = false;
+            }, 100);
+        });
+    });
+
+    // Auto-logout inteligente (solo al cerrar pestaña real)
+    window.addEventListener('beforeunload', function(e) {
+        if (!isInternalNavigation) {
+            const logoutUrl = "{% url 'logout' %}";
+            const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]')?.value || 
+                             document.querySelector('meta[name=csrf-token]')?.getAttribute('content');
+            
+            if (navigator.sendBeacon && csrfToken) {
+                const formData = new FormData();
+                formData.append('csrfmiddlewaretoken', csrfToken);
+                navigator.sendBeacon(logoutUrl, formData);
+            }
+        }
+    });
+
+    window.addEventListener('pagehide', function(e) {
+        if (e.persisted === false && !isInternalNavigation) {
+            const logoutUrl = "{% url 'logout' %}";
+            const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]')?.value || 
+                             document.querySelector('meta[name=csrf-token]')?.getAttribute('content');
+            
+            if (navigator.sendBeacon && csrfToken) {
+                const formData = new FormData();
+                formData.append('csrfmiddlewaretoken', csrfToken);
+                navigator.sendBeacon(logoutUrl, formData);
+            }
+        }
+    });
+  });
+</script>

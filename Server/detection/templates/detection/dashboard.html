@@ -1,117 +1,353 @@
-{%  extends 'detection/main.html' %}
+{% extends 'detection/main.html' %}
 
 {% block content %}
 
 {% load event_tags %}
 {% load static %}
 
-<div class="limiter">
-<div class="container-login100 p-b-0 p-t-0">
-	<div class="wrap-login100 p-l-30 p-r-30 p-t-20 p-b-20">
-		<div class="Search">
-			<form method="get">
-				<div class="row">
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Weapon Detection System - Dashboard</title>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+  
+  <!-- Cargar el archivo CSS específico del dashboard -->
+  <link rel="stylesheet" href="{% static 'css/dashboard.css' %}">
+</head>
 
-					<div class="col">
-						<!-- Location Input -->
-						<input class="form-control" type="text"  placeholder="Location"
-						name="{{ myFilter.form.location.name }}"
-						id="{{ myFilter.form.location.id_for_label }}"
-						{% if myFilter.form.location.value != None %}value="{{ myFilter.form.location.value|stringformat:'s' }}"{% endif %}
-						maxlength="{{ myFilter.form.location.field.max_length }}"
-						{% if myFilter.form.location.field.required %}required{% endif %}>
-					</div>
+<body>
+  <!-- Incluir el navbar -->
+  {% include 'detection/navbar.html' %}
 
-					<div class="col">
-						<!-- Alert was sent to Input -->
-						<input class="form-control" type="text"  placeholder="Alert was sent to"
-						name="{{ myFilter.form.alertReceiver.name }}"
-						id="{{ myFilter.form.alertReceiver.id_for_label }}"
-						{% if myFilter.form.alertReceiver.value != None %}value="{{ myFilter.form.alertReceiver.value|stringformat:'s' }}"{% endif %}
-						maxlength="{{ myFilter.form.alertReceiver.field.max_length }}"
-						{% if myFilter.form.alertReceiver.field.required %}required{% endif %}>
-					</div>
+  <div class="dashboard-root">
+    <!-- Animated Background -->
+    <div class="dashboard-background">
+      <div class="dashboard-background-grid">
+        <div class="bg-element" style="grid-area: top / start / 8 / end;">
+          <div style="background: linear-gradient(rgba(15, 23, 42, 0.8) 0%, rgba(30, 41, 59, 0.9) 33%); height: 100%;"></div>
+        </div>
+        <div class="bg-element bg-border animate-left" style="grid-area: 4 / 2 / auto / 5;"></div>
+        <div class="bg-element bg-dark" style="grid-area: 6 / start / auto / 2;"></div>
+        <div class="bg-element bg-blue animate-left" style="grid-area: 7 / start / auto / 4;"></div>
+        <div class="bg-element bg-gray animate-left" style="grid-area: 8 / 4 / auto / 6;"></div>
+        <div class="bg-element bg-cyan animate-right" style="grid-area: 2 / 15 / auto / end;"></div>
+        <div class="bg-element bg-blue animate-right" style="grid-area: 3 / 14 / auto / end;"></div>
+        <div class="bg-element bg-gray animate-right" style="grid-area: 4 / 17 / auto / 20;"></div>
+        <div class="bg-element bg-border animate-right" style="grid-area: 5 / 14 / auto / 17;"></div>
+      </div>
+    </div>
 
-					<div class="col-2">
-						<!-- Start Date Input -->
-						<input class="form-control" type="text" id="date" placeholder="Start Date" autocomplete="off"
-						name="{{ myFilter.form.startDate.name }}"
-						id="{{ myFilter.form.startDate.id_for_label }}"
-						{% if myFilter.form.startDate.value != None %}value="{{ myFilter.form.startDate.value|stringformat:'s' }}"{% endif %}
-						maxlength="{{ myFilter.form.startDate.field.max_length }}"
-						{% if myFilter.form.startDate.field.required %}required{% endif %}>
-					</div>
+    <!-- Dashboard Content -->
+    <div class="dashboard-container">
+      <!-- Header (ahora más pequeño porque tenemos navbar) -->
+      <div class="dashboard-header">
+        <p class="dashboard-subtitle">Security Dashboard - Real-time Monitoring</p>
+      </div>
 
-					<div class="col-2">
-						<!-- End Date Input Input -->
-						<input class="form-control" type="text" id="date" placeholder="End Date" autocomplete="off"
-						name="{{ myFilter.form.endDate.name }}"
-						id="{{ myFilter.form.endDate.id_for_label }}"
-						{% if myFilter.form.endDate.value != None %}value="{{ myFilter.form.endDate.value|stringformat:'s' }}"{% endif %}
-						maxlength="{{ myFilter.form.endDate.field.max_length }}"
-						{% if myFilter.form.endDate.field.required %}required{% endif %}>
-					</div>
+      <!-- Search Card -->
+      <div class="search-card">
+        <h2 class="search-title">
+          <i class="fas fa-search"></i>
+          Search & Filter
+        </h2>
+        <form method="get">
+          <div class="search-grid">
+            <div class="form-group">
+              <label class="form-label">Location</label>
+              <input class="form-input" type="text" placeholder="Enter location"
+                name="{{ myFilter.form.location.name }}"
+                id="{{ myFilter.form.location.id_for_label }}"
+                {% if myFilter.form.location.value != None %}value="{{ myFilter.form.location.value|stringformat:'s' }}"{% endif %}
+                maxlength="{{ myFilter.form.location.field.max_length }}"
+                {% if myFilter.form.location.field.required %}required{% endif %}>
+            </div>
 
-					<div class="col-1">
-						<button class="btn btn-primary" type="submit">Search</button>
-					</div>
-				  </div>
-			</form>
-		</div>
-		
-</div>
-</div>
-</div>
+            <div class="form-group">
+              <label class="form-label">Alert Receiver</label>
+              <input class="form-input" type="text" placeholder="Alert recipient"
+                name="{{ myFilter.form.alertReceiver.name }}"
+                id="{{ myFilter.form.alertReceiver.id_for_label }}"
+                {% if myFilter.form.alertReceiver.value != None %}value="{{ myFilter.form.alertReceiver.value|stringformat:'s' }}"{% endif %}
+                maxlength="{{ myFilter.form.alertReceiver.field.max_length }}"
+                {% if myFilter.form.alertReceiver.field.required %}required{% endif %}>
+            </div>
 
-   <script>
-	jQuery(document).ready(function($){
-	  var date_input=$('input[id="date"]');
-	  var container=$('.bootstrap-iso form').length>0 ? $('.bootstrap-iso form').parent() : "body";
-	  var options={
-		format: 'yyyy-mm-dd',
-		container: container,
-		todayHighlight: true,
-		autoclose: true,
-	  };
-	  date_input.datepicker(options);
-	});
-	</script>
-	
-<div class="limiter">
-<div class="container-login100 p-t-0">
-	<div class="wrap-login100 p-l-40 p-r-40 p-t-25 p-b-15">
-		
-		<table class="table table-image">
-			<tr>
-				<th scope="col" class="top-row">Detection</th>
-				<th scope="col" class="top-row">Location</th>
-				<th scope="col" class="top-row">Alert was sent to</th>
-				<th scope="col" class="top-row">Time</th>
-				<th scope="col" class="top-row">Alert</th>
-			</tr>
+            <div class="form-group">
+              <label class="form-label">Start Date</label>
+              <input class="form-input date-picker" type="text" placeholder="Start Date" autocomplete="off"
+                name="{{ myFilter.form.startDate.name }}"
+                id="{{ myFilter.form.startDate.id_for_label }}"
+                {% if myFilter.form.startDate.value != None %}value="{{ myFilter.form.startDate.value|stringformat:'s' }}"{% endif %}
+                maxlength="{{ myFilter.form.startDate.field.max_length }}"
+                {% if myFilter.form.startDate.field.required %}required{% endif %}>
+            </div>
 
-			{% for alert in uploadAlert %}
+            <div class="form-group">
+              <label class="form-label">End Date</label>
+              <input class="form-input date-picker" type="text" placeholder="End Date" autocomplete="off"
+                name="{{ myFilter.form.endDate.name }}"
+                id="{{ myFilter.form.endDate.id_for_label }}"
+                {% if myFilter.form.endDate.value != None %}value="{{ myFilter.form.endDate.value|stringformat:'s' }}"{% endif %}
+                maxlength="{{ myFilter.form.endDate.field.max_length }}"
+                {% if myFilter.form.endDate.field.required %}required{% endif %}>
+            </div>
 
-			<tr>
-				<td class="w-25"><img style="max-width: 250px; max-height: 150x; border-radius: 2.5%;" 
-					class="img-fluid" src='{{ alert.image.url }}'/></td>
-				<td>{{alert.location}}</td>
-				<td>{{alert.alertReceiver}}</td>
-				<td>{{alert.dateCreated|date:"Y-m-d H:i:s"}}</td>
-				
-				{% with uuid=alert.image|split:"." %}
+            <button class="search-btn" type="submit">
+              <i class="fas fa-search"></i>
+              Search
+            </button>
+          </div>
+        </form>
+      </div>
 
-				<td><a class="btn btn-sm btn-info" href="/alert/{{uuid.0}}">View</a></td>
+      <!-- Results Card -->
+      <div class="results-card">
+        <div class="results-header">
+          <h2 class="results-title">
+            <i class="fas fa-exclamation-triangle"></i>
+            Detection Results
+          </h2>
+          <div class="results-stats">
+            <span class="stats-text">
+              Showing {{ uploadAlert|length }} of {{ total_results|default:"0" }} results
+            </span>
+          </div>
+        </div>
+        
+        <table class="results-table">
+          <thead>
+            <tr>
+              <th>Detection</th>
+              <th>Location</th>
+              <th>Alert Receiver</th>
+              <th>Timestamp</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for alert in uploadAlert %}
+            <tr>
+              <td>
+                <img class="detection-image" src='{{ alert.image.url }}' alt="Detection Image"/>
+              </td>
+              <td class="location-cell">{{ alert.location }}</td>
+              <td class="receiver-cell">{{ alert.alertReceiver }}</td>
+              <td class="time-cell">{{ alert.dateCreated|date:"Y-m-d H:i:s" }}</td>
+              <td>
+                {% with uuid=alert.image|split:"." %}
+                <a class="view-btn" href="/alert/{{ uuid.0 }}">
+                  <i class="fas fa-eye"></i>
+                  View Details
+                </a>
+                {% endwith %}
+              </td>
+            </tr>
+            {% empty %}
+            <tr>
+              <td colspan="5" class="no-results">
+                <div class="no-results-content">
+                  <i class="fas fa-search"></i>
+                  <h3>No alerts found</h3>
+                  <p>Try adjusting your search criteria</p>
+                </div>
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
 
-				{% endwith %}
-				
-			</tr>
-			{% endfor %}
+        <!-- Pagination Controls -->
+        {% if uploadAlert.has_other_pages %}
+        <div class="pagination-container">
+          <div class="pagination-info">
+            <span class="pagination-text">
+              Page {{ uploadAlert.number }} of {{ uploadAlert.paginator.num_pages }}
+            </span>
+          </div>
+          
+          <div class="pagination-controls">
+            <!-- First Page -->
+            {% if uploadAlert.has_previous %}
+              <a href="?{% for key, value in request.GET.items %}{% if key != 'page' %}{{ key }}={{ value }}&{% endif %}{% endfor %}page=1" 
+                 class="pagination-btn pagination-btn-nav" title="First Page">
+                <i class="fas fa-angle-double-left"></i>
+              </a>
+            {% else %}
+              <span class="pagination-btn pagination-btn-nav pagination-btn-disabled">
+                <i class="fas fa-angle-double-left"></i>
+              </span>
+            {% endif %}
 
-		</table>
-	
-	</div>
-</div>
-</div>
+            <!-- Previous Page -->
+            {% if uploadAlert.has_previous %}
+              <a href="?{% for key, value in request.GET.items %}{% if key != 'page' %}{{ key }}={{ value }}&{% endif %}{% endfor %}page={{ uploadAlert.previous_page_number }}" 
+                 class="pagination-btn pagination-btn-nav" title="Previous Page">
+                <i class="fas fa-angle-left"></i>
+                Previous
+              </a>
+            {% else %}
+              <span class="pagination-btn pagination-btn-nav pagination-btn-disabled">
+                <i class="fas fa-angle-left"></i>
+                Previous
+              </span>
+            {% endif %}
+
+            <!-- Page Numbers -->
+            <div class="pagination-numbers">
+              {% for num in uploadAlert.paginator.page_range %}
+                {% if uploadAlert.number == num %}
+                  <span class="pagination-btn pagination-btn-number pagination-btn-current">{{ num }}</span>
+                {% elif num > uploadAlert.number|add:'-3' and num < uploadAlert.number|add:'3' %}
+                  <a href="?{% for key, value in request.GET.items %}{% if key != 'page' %}{{ key }}={{ value }}&{% endif %}{% endfor %}page={{ num }}" 
+                     class="pagination-btn pagination-btn-number">{{ num }}</a>
+                {% elif num == 1 or num == uploadAlert.paginator.num_pages %}
+                  <a href="?{% for key, value in request.GET.items %}{% if key != 'page' %}{{ key }}={{ value }}&{% endif %}{% endfor %}page={{ num }}" 
+                     class="pagination-btn pagination-btn-number">{{ num }}</a>
+                {% elif num == uploadAlert.number|add:'-4' or num == uploadAlert.number|add:'4' %}
+                  <span class="pagination-dots">...</span>
+                {% endif %}
+              {% endfor %}
+            </div>
+
+            <!-- Next Page -->
+            {% if uploadAlert.has_next %}
+              <a href="?{% for key, value in request.GET.items %}{% if key != 'page' %}{{ key }}={{ value }}&{% endif %}{% endfor %}page={{ uploadAlert.next_page_number }}" 
+                 class="pagination-btn pagination-btn-nav" title="Next Page">
+                Next
+                <i class="fas fa-angle-right"></i>
+              </a>
+            {% else %}
+              <span class="pagination-btn pagination-btn-nav pagination-btn-disabled">
+                Next
+                <i class="fas fa-angle-right"></i>
+              </span>
+            {% endif %}
+
+            <!-- Last Page -->
+            {% if uploadAlert.has_next %}
+              <a href="?{% for key, value in request.GET.items %}{% if key != 'page' %}{{ key }}={{ value }}&{% endif %}{% endfor %}page={{ uploadAlert.paginator.num_pages }}" 
+                 class="pagination-btn pagination-btn-nav" title="Last Page">
+                <i class="fas fa-angle-double-right"></i>
+              </a>
+            {% else %}
+              <span class="pagination-btn pagination-btn-nav pagination-btn-disabled">
+                <i class="fas fa-angle-double-right"></i>
+              </span>
+            {% endif %}
+          </div>
+
+          <!-- Page Size Selector -->
+          <div class="page-size-selector">
+            <label for="pageSize" class="page-size-label">Items per page:</label>
+            <select id="pageSize" class="page-size-select" onchange="changePageSize(this.value)">
+              <option value="10" {% if request.GET.per_page == '10' or not request.GET.per_page %}selected{% endif %}>10</option>
+              <option value="25" {% if request.GET.per_page == '25' %}selected{% endif %}>25</option>
+              <option value="50" {% if request.GET.per_page == '50' %}selected{% endif %}>50</option>
+              <option value="100" {% if request.GET.per_page == '100' %}selected{% endif %}>100</option>
+            </select>
+          </div>
+        </div>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+
+  <!-- Incluir el footer -->
+  {% include 'detection/footer.html' %}
+
+  <!-- JavaScript externo -->
+  <script src="{% static 'js/dashboard.js' %}"></script>
+  
+  <script>
+    jQuery(document).ready(function($){
+      var date_input = $('.date-picker');
+      var container = $('.search-card').length > 0 ? $('.search-card') : "body";
+      var options = {
+        format: 'yyyy-mm-dd',
+        container: container,
+        todayHighlight: true,
+        autoclose: true,
+      };
+      date_input.datepicker(options);
+    });
+
+    // Function to change page size
+    function changePageSize(newSize) {
+      const url = new URL(window.location.href);
+      url.searchParams.set('per_page', newSize);
+      url.searchParams.set('page', '1'); // Reset to first page
+      
+      // Marcar como navegación interna
+      window.isInternalNavigation = true;
+      window.location.href = url.toString();
+    }
+
+    // Add smooth scroll animations for pagination
+    document.addEventListener('DOMContentLoaded', function() {
+      const paginationLinks = document.querySelectorAll('.pagination-btn:not(.pagination-btn-disabled)');
+      
+      paginationLinks.forEach(link => {
+        if (link.href) {
+          link.addEventListener('click', function(e) {
+            // Marcar como navegación interna
+            window.isInternalNavigation = true;
+            
+            // Add loading state
+            this.style.opacity = '0.7';
+            this.style.pointerEvents = 'none';
+            
+            // Add a small loading spinner
+            const originalContent = this.innerHTML;
+            if (!this.classList.contains('pagination-btn-number')) {
+              this.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+            }
+            
+            // Allow the navigation to proceed
+            setTimeout(() => {
+              this.innerHTML = originalContent;
+              this.style.opacity = '1';
+              this.style.pointerEvents = 'auto';
+            }, 100);
+          });
+        }
+      });
+
+      // Variable para controlar navegación interna
+      let isInternalNavigation = false;
+      window.isInternalNavigation = false;
+
+      // Detectar navegación interna
+      const internalLinks = document.querySelectorAll('a[href^="/"], a[href*="alert/"], .view-btn');
+      internalLinks.forEach(link => {
+          link.addEventListener('click', function() {
+              isInternalNavigation = true;
+              window.isInternalNavigation = true;
+              setTimeout(() => {
+                  isInternalNavigation = false;
+                  window.isInternalNavigation = false;
+              }, 100);
+          });
+      });
+
+      // Auto-logout inteligente
+      window.addEventListener('beforeunload', function(e) {
+          if (!isInternalNavigation && !window.isInternalNavigation) {
+              const logoutUrl = "{% url 'logout' %}";
+              const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]')?.value || 
+                               document.querySelector('meta[name=csrf-token]')?.getAttribute('content');
+              
+              if (navigator.sendBeacon && csrfToken) {
+                  const formData = new FormData();
+                  formData.append('csrfmiddlewaretoken', csrfToken);
+                  navigator.sendBeacon(logoutUrl, formData);
+              }
+          }
+      });
+    });
+  </script>
+</body>
+</html>
 
 {% endblock %}

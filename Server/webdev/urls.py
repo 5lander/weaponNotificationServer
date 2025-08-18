@@ -17,21 +17,12 @@ from django.contrib import admin
 from django.urls import path, include
 from django.conf.urls.static import static
 from django.conf import settings
-from django.urls import re_path
-from django.http import HttpResponse
-from django.db import connections
-from django.db.utils import OperationalError
+from django.conf.urls import url
 
-def health_check(request):
-    try:
-        connections['default'].ensure_connection()
-        return HttpResponse("OK", status=200)
-    except OperationalError:
-        return HttpResponse("Database unavailable", status=503)
 
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('', include('detection.urls')),
-    re_path(r'^api/', include(('alertuploadREST.urls', 'alertuploadREST'), namespace='api')),
-    path('health/', health_check, name='health_check'),
+    url(r'^api/', include(('alertuploadREST.urls', 'alertuploadREST'), namespace='api')),
 ]+ static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+

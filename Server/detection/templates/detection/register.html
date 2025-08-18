@@ -2,77 +2,570 @@
 
 <!DOCTYPE html>
 <html>
-    
 <head>
-	<title>Register</title>
-	<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css" integrity="sha384-MCw98/SFnGE8fJT3GXwEOngsV7Zt27NXFoaoApmYm81iuXoPkFOJwJ8ERdknLPMO" crossorigin="anonymous">
-	<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
-	<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.6.1/css/all.css" integrity="sha384-gfdkjb5BdAXd+lj+gudLWI+BXq4IuLW5IT+brZEZsLFm++aCMlF1V92rMkPaX4PP" crossorigin="anonymous">
-	<link rel="stylesheet" type="text/css" href="{% static '/css/register.css' %}">
-	<link rel="stylesheet" type="text/css" href="{% static '/css/util.css' %}">
+  <meta charset="utf-8">
+  <title>Weapon Detection System - Create Account</title>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+  
+  <style>
+    * {
+      padding: 0;
+      margin: 0;
+      color: #1a1f36;
+      box-sizing: border-box;
+      word-wrap: break-word;
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, Segoe UI, Roboto, Helvetica Neue, Ubuntu, sans-serif;
+    }
 
+    body {
+        min-height: 100%;
+        background-color: #0f172a;
+    }
+
+    h1 {
+        letter-spacing: -1px;
+    }
+
+    a {
+      color: #3b82f6;
+      text-decoration: unset;
+    }
+
+    .login-root {
+        background: #0f172a;
+        display: flex;
+        width: 100%;
+        min-height: 100vh;
+        overflow: hidden;
+    }
+
+    .loginbackground {
+        min-height: 692px;
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        top: 0;
+        z-index: 0;
+        overflow: hidden;
+    }
+
+    .flex-flex {
+        display: flex;
+    }
+
+    .align-center {
+      align-items: center; 
+    }
+
+    .center-center {
+      align-items: center;
+      justify-content: center;
+    }
+
+    .box-root {
+        box-sizing: border-box;
+    }
+
+    .flex-direction--column {
+        -ms-flex-direction: column;
+        flex-direction: column;
+    }
+
+    .loginbackground-gridContainer {
+        display: -ms-grid;
+        display: grid;
+        -ms-grid-columns: [start] 1fr [left-gutter] (86.6px)[16] [left-gutter] 1fr [end];
+        grid-template-columns: [start] 1fr [left-gutter] repeat(16,86.6px) [left-gutter] 1fr [end];
+        -ms-grid-rows: [top] 1fr [top-gutter] (64px)[8] [bottom-gutter] 1fr [bottom];
+        grid-template-rows: [top] 1fr [top-gutter] repeat(8,64px) [bottom-gutter] 1fr [bottom];
+        justify-content: center;
+        margin: 0 -2%;
+        transform: rotate(-12deg) skew(-12deg);
+    }
+
+    .box-divider--light-all-2 {
+        box-shadow: inset 0 0 0 2px #334155;
+    }
+
+    .box-background--blue {
+        background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+    }
+
+    .box-background--white {
+      background-color: #1e293b; 
+    }
+
+    .box-background--blue800 {
+        background: linear-gradient(135deg, #1e40af 0%, #1e3a8a 100%);
+    }
+
+    .box-background--gray100 {
+        background-color: #374151;
+    }
+
+    .box-background--cyan200 {
+        background: linear-gradient(135deg, #06b6d4 0%, #0891b2 100%);
+    }
+
+    .box-background--green {
+        background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+    }
+
+    .box-background--purple {
+        background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%);
+    }
+
+    .padding-top--64 {
+      padding-top: 64px;
+    }
+
+    .padding-top--24 {
+      padding-top: 24px;
+    }
+
+    .padding-top--48 {
+      padding-top: 48px;
+    }
+
+    .padding-bottom--24 {
+      padding-bottom: 24px;
+    }
+
+    .padding-horizontal--48 {
+      padding: 48px;
+    }
+
+    .padding-bottom--15 {
+      padding-bottom: 15px;
+    }
+
+    .flex-justifyContent--center {
+      -ms-flex-pack: center;
+      justify-content: center;
+    }
+
+    .brand-title {
+        color: white;
+        font-size: 32px;
+        font-weight: 700;
+        text-decoration: none;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+    }
+
+    .brand-title i {
+        color: #10b981;
+        font-size: 36px;
+    }
+
+    .formbg {
+        margin: 0px auto;
+        width: 100%;
+        max-width: 480px;
+        background: rgba(255, 255, 255, 0.95);
+        backdrop-filter: blur(20px);
+        border-radius: 16px;
+        box-shadow: 0 25px 50px rgba(0, 0, 0, 0.25);
+    }
+
+    .formbg-inner {
+        padding: 48px;
+    }
+
+    span {
+        display: block;
+        font-size: 20px;
+        line-height: 28px;
+        color: #1a1f36;
+        font-weight: 600;
+    }
+
+    .register-subtitle {
+        font-size: 16px !important;
+        color: #64748b !important;
+        font-weight: 400 !important;
+        margin-bottom: 8px;
+    }
+
+    label {
+        margin-bottom: 8px;
+        font-size: 14px;
+        font-weight: 600;
+        display: block;
+        color: #374151;
+    }
+
+    .field {
+        margin-bottom: 24px;
+    }
+
+    .field input {
+        font-size: 16px;
+        line-height: 28px;
+        padding: 12px 16px;
+        width: 100%;
+        min-height: 48px;
+        border: 2px solid #e2e8f0;
+        border-radius: 12px;
+        outline: none;
+        background-color: #f8fafc;
+        transition: all 0.3s ease;
+        font-family: 'Inter', sans-serif;
+    }
+
+    .field input:focus {
+        border-color: #10b981;
+        background-color: white;
+        box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.1);
+    }
+
+    .field input:valid {
+        border-color: #10b981;
+    }
+
+    .field input[type="email"]:focus {
+        border-color: #3b82f6;
+        box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+    }
+
+    input[type="submit"] {
+        background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+        color: #fff;
+        font-weight: 600;
+        cursor: pointer;
+        border: none;
+        transition: all 0.3s ease;
+        position: relative;
+        overflow: hidden;
+        font-size: 16px;
+    }
+
+    input[type="submit"]:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 10px 25px rgba(16, 185, 129, 0.3);
+    }
+
+    input[type="submit"]::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+        transition: left 0.5s;
+    }
+
+    input[type="submit"]:hover::before {
+        left: 100%;
+    }
+
+    .footer-link {
+        text-align: center;
+        padding-top: 24px;
+    }
+
+    .footer-link span {
+        font-size: 14px;
+        text-align: center;
+        color: rgba(255, 255, 255, 0.8);
+    }
+
+    .footer-link a {
+        color: #3b82f6;
+        font-weight: 500;
+        transition: color 0.3s ease;
+    }
+
+    .footer-link a:hover {
+        color: #60a5fa;
+    }
+
+    .listing a {
+        color: rgba(255, 255, 255, 0.6);
+        font-weight: 500;
+        margin: 0 10px;
+        font-size: 12px;
+        transition: color 0.3s ease;
+    }
+
+    .listing a:hover {
+        color: rgba(255, 255, 255, 0.8);
+    }
+
+    /* Mensajes de error */
+    .error-message {
+        background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+        color: white;
+        padding: 16px;
+        border-radius: 12px;
+        margin-bottom: 24px;
+        font-size: 14px;
+        font-weight: 500;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .error-field {
+        background: rgba(239, 68, 68, 0.1);
+        border: 1px solid #ef4444;
+        border-radius: 8px;
+        padding: 8px 12px;
+        margin-bottom: 16px;
+    }
+
+    .error-field .field_label {
+        font-weight: 600;
+        color: #dc2626;
+        font-size: 13px;
+        margin-bottom: 4px;
+    }
+
+    .error-field p {
+        color: #dc2626;
+        font-size: 12px;
+        margin: 0;
+    }
+
+    /* Indicador de fortaleza de contraseña */
+    .password-strength {
+        height: 4px;
+        background: #e2e8f0;
+        border-radius: 2px;
+        margin-top: 8px;
+        overflow: hidden;
+    }
+
+    .password-strength-bar {
+        height: 100%;
+        width: 0%;
+        transition: all 0.3s ease;
+        border-radius: 2px;
+    }
+
+    .strength-weak { background: #ef4444; width: 25%; }
+    .strength-fair { background: #f59e0b; width: 50%; }
+    .strength-good { background: #3b82f6; width: 75%; }
+    .strength-strong { background: #10b981; width: 100%; }
+
+    /* Animaciones del fondo */
+    .animationRightLeft {
+      animation: animationRightLeft 2s ease-in-out infinite;
+    }
+
+    .animationLeftRight {
+      animation: animationLeftRight 2s ease-in-out infinite;
+    }
+
+    .tans3s {
+      animation: animationLeftRight 3s ease-in-out infinite;
+    }
+
+    .tans4s {
+      animation: animationLeftRight 4s ease-in-out infinite;
+    }
+
+    .tans5s {
+      animation: animationRightLeft 5s ease-in-out infinite;
+    }
+
+    @keyframes animationLeftRight {
+      0% {
+        transform: translateX(0px);
+      }
+      50% {
+        transform: translateX(1000px);
+      }
+      100% {
+        transform: translateX(0px);
+      }
+    } 
+
+    @keyframes animationRightLeft {
+      0% {
+        transform: translateX(0px);
+      }
+      50% {
+        transform: translateX(-1000px);
+      }
+      100% {
+        transform: translateX(0px);
+      }
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+        .formbg {
+            max-width: 380px;
+            margin: 0 20px;
+        }
+        
+        .formbg-inner {
+            padding: 32px 24px;
+        }
+        
+        .brand-title {
+            font-size: 24px;
+        }
+        
+        .brand-title i {
+            font-size: 28px;
+        }
+    }
+  </style>
 </head>
+
 <body>
-	
-	<div class="limiter">
-		<div class="container-login100">
-			<div class="wrap-login100 p-l-55 p-r-55 p-t-65 p-b-50">
-				<form class="login100-form validate-form" method="POST" action="">
-					{% csrf_token %}
-					<span class="login100-form-title p-b-33">
-						Register Account
-					</span>
+  <div class="login-root">
+    <div class="box-root flex-flex flex-direction--column" style="min-height: 100vh;flex-grow: 1;">
+      <div class="loginbackground box-background--white padding-top--64">
+        <div class="loginbackground-gridContainer">
+          <div class="box-root flex-flex" style="grid-area: top / start / 8 / end;">
+            <div class="box-root" style="background: linear-gradient(rgba(15, 23, 42, 0.8) 0%, rgba(30, 41, 59, 0.9) 33%); flex-grow: 1;">
+            </div>
+          </div>
+          <div class="box-root flex-flex" style="grid-area: 4 / 2 / auto / 5;">
+            <div class="box-root box-divider--light-all-2 animationLeftRight tans3s" style="flex-grow: 1;"></div>
+          </div>
+          <div class="box-root flex-flex" style="grid-area: 6 / start / auto / 2;">
+            <div class="box-root box-background--green" style="flex-grow: 1;"></div>
+          </div>
+          <div class="box-root flex-flex" style="grid-area: 7 / start / auto / 4;">
+            <div class="box-root box-background--blue animationLeftRight" style="flex-grow: 1;"></div>
+          </div>
+          <div class="box-root flex-flex" style="grid-area: 8 / 4 / auto / 6;">
+            <div class="box-root box-background--purple animationLeftRight tans5s" style="flex-grow: 1;"></div>
+          </div>
+          <div class="box-root flex-flex" style="grid-area: 2 / 15 / auto / end;">
+            <div class="box-root box-background--cyan200 animationRightLeft tans4s" style="flex-grow: 1;"></div>
+          </div>
+          <div class="box-root flex-flex" style="grid-area: 3 / 14 / auto / end;">
+            <div class="box-root box-background--green animationRightLeft" style="flex-grow: 1;"></div>
+          </div>
+          <div class="box-root flex-flex" style="grid-area: 4 / 17 / auto / 20;">
+            <div class="box-root box-background--gray100 animationRightLeft tans4s" style="flex-grow: 1;"></div>
+          </div>
+          <div class="box-root flex-flex" style="grid-area: 5 / 14 / auto / 17;">
+            <div class="box-root box-divider--light-all-2 animationRightLeft tans3s" style="flex-grow: 1;"></div>
+          </div>
+        </div>
+      </div>
+      <div class="box-root padding-top--24 flex-flex flex-direction--column" style="flex-grow: 1; z-index: 9;">
+        <div class="box-root padding-top--48 padding-bottom--24 flex-flex flex-justifyContent--center">
+          <h1>
+            <a href="#" class="brand-title" rel="dofollow">
+              <i class="fas fa-user-plus"></i>
+              Weapon Detection System
+            </a>
+          </h1>
+        </div>
+        <div class="formbg-outer">
+          <div class="formbg">
+            <div class="formbg-inner padding-horizontal--48">
+              <span class="padding-bottom--15">Create Your Account</span>
+              <p class="register-subtitle">Join our security platform</p>
+              
+              <!-- Mensajes de error del formulario -->
+              {% if form.errors %}
+                {% for field in form %}				
+                  {% for error in field.errors %}
+                  <div class="error-field">
+                    <p class="field_label">{{field.label}}:</p>
+                    <p>{{ error|escape }}</p>
+                  </div>
+                  {% endfor %}
+                {% endfor %}
+              {% endif %}
+              
+              <form method="POST" action="">
+                {% csrf_token %}
+                
+                <div class="field padding-bottom--24">
+                  <label for="username">Username</label>
+                  <input type="text" name="username" id="username" required placeholder="Choose a username">
+                </div>
+                
+                <div class="field padding-bottom--24">
+                  <label for="email">Email Address</label>
+                  <input type="email" name="email" id="email" required placeholder="your.email@example.com">
+                </div>
+                
+                <div class="field padding-bottom--24">
+                  <label for="password1">Password</label>
+                  <input type="password" name="password1" id="password1" required placeholder="Create a strong password">
+                  <div class="password-strength">
+                    <div class="password-strength-bar" id="strength-bar"></div>
+                  </div>
+                </div>
+                
+                <div class="field padding-bottom--24">
+                  <label for="password2">Confirm Password</label>
+                  <input type="password" name="password2" id="password2" required placeholder="Repeat your password">
+                </div>
+                
+                <div class="field padding-bottom--24">
+                  <input type="submit" name="submit" value="Create Account">
+                </div>
+              </form>
+            </div>
+          </div>
+          <div class="footer-link padding-top--24">
+            <span>Already have an account? <a href="{% url 'login' %}">Sign in</a></span>
+            <div class="listing padding-top--24 padding-bottom--24 flex-flex center-center">
+              <span><a href="#">© Weapon Detection System</a></span>
+              <span><a href="#">Contact</a></span>
+              <span><a href="#">Privacy & terms</a></span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
 
-					<div class="wrap-input100 validate-input" data-validate = "Valid email is required: ex@abc.xyz">
-						<input class="input100" type="text" name="username" placeholder="Username">
-					</div>
+  <script>
+    // Verificador de fortaleza de contraseña
+    document.getElementById('password1').addEventListener('input', function(e) {
+        const password = e.target.value;
+        const strengthBar = document.getElementById('strength-bar');
+        
+        let strength = 0;
+        
+        // Verificaciones de fortaleza
+        if (password.length >= 8) strength++;
+        if (/[a-z]/.test(password)) strength++;
+        if (/[A-Z]/.test(password)) strength++;
+        if (/\d/.test(password)) strength++;
+        if (/[^a-zA-Z0-9]/.test(password)) strength++;
+        
+        // Aplicar clase según fortaleza
+        strengthBar.className = 'password-strength-bar';
+        
+        if (strength <= 1) {
+            strengthBar.classList.add('strength-weak');
+        } else if (strength <= 2) {
+            strengthBar.classList.add('strength-fair');
+        } else if (strength <= 3) {
+            strengthBar.classList.add('strength-good');
+        } else {
+            strengthBar.classList.add('strength-strong');
+        }
+    });
 
-					<div class="wrap-input100 rs1 validate-input" data-validate="Password is required">
-						<input class="input100" type="email" name="email" placeholder="Email">
-					</div>
-
-					<div class="wrap-input100 rs1 validate-input" data-validate="Password is required">
-						<input class="input100" type="password" name="password1" placeholder="Password">
-					</div>
-
-					<div class="wrap-input100 rs1 validate-input" data-validate="Password is required">
-						<input class="input100" type="password" name="password2" placeholder="Confirm Password">
-					</div>
-
-					<div class="container-login100-form-btn m-t-20 m-b-15">
-						<button class="login100-form-btn" type="submit" value="Register">
-							Create Account
-						</button>
-					</div>
-
-					{% if form.errors %}
-						{% for field in form %}				
-							{% for error in field.errors %}
-							<div class="error">
-								<p class="field_label">{{field.label}}:</p>
-								<p>{{ error|escape }}</p>
-							</div>
-							{% endfor %}
-						{% endfor %}
-					{% endif %}
-
-					
-
-					<div class="text-center p-t-15 p-b-4">
-						<span class="txt1">
-							Already have an account?
-						</span>
-
-						<a href="{% url 'login' %}" class="txt2 hov1">
-							Login
-						</a>
-					</div>
-
-				</form>
-			</div>
-		</div>
-	</div>
-
+    // Validación de confirmación de contraseña
+    document.getElementById('password2').addEventListener('input', function(e) {
+        const password1 = document.getElementById('password1').value;
+        const password2 = e.target.value;
+        
+        if (password2 && password1 !== password2) {
+            e.target.style.borderColor = '#ef4444';
+        } else {
+            e.target.style.borderColor = '#10b981';
+        }
+    });
+  </script>
 </body>
-
 </html>
