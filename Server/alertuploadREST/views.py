@@ -414,7 +414,7 @@ def generate_alert_url(image_path):
     """Genera la URL de la alerta de forma robusta"""
     try:
         if not image_path:
-            return 'https://weapondetectionsystem.onrender.com/alert/unknown'
+            return 'https://weaponnotificationserver.onrender.com/alert/unknown'
         
         # Método robusto usando os.path
         filename = os.path.basename(str(image_path))
@@ -422,20 +422,20 @@ def generate_alert_url(image_path):
         if filename:
             name_without_extension = os.path.splitext(filename)[0]
             if name_without_extension:
-                return f'https://weapondetectionsystem.onrender.com/alert/{name_without_extension}'
+                return f'https://weaponnotificationserver.onrender.com/alert/{name_without_extension}'
         
         # Fallback al método original
         parts_by_dot = str(image_path).split(".")
         if len(parts_by_dot) >= 4:
             parts_by_slash = str(parts_by_dot[3]).split("/")
             if len(parts_by_slash) >= 3:
-                return f'https://weapondetectionsystem.onrender.com/alert/{parts_by_slash[2]}'
+                return f'https://weaponnotificationserver.onrender.com/alert/{parts_by_slash[2]}'
         
-        return 'https://weapondetectionsystem.onrender.com/alert/processing'
+        return 'https://weaponnotificationserver.onrender.com/alert/processing'
         
     except Exception as e:
         print(f"Error generating alert URL: {e}")
-        return 'https://weapondetectionsystem.onrender.com/alert/error'
+        return 'https://weaponnotificationserver.onrender.com/alert/error'
 
 def split(value, key):
     """Función auxiliar para dividir strings"""
