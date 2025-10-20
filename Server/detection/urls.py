@@ -8,11 +8,11 @@ urlpatterns = [
     path('', views.home, name='home'),
     path('logout/', views.logoutUser, name='logout'),
 
-    # Password Reset con templates personalizados
+    # ✅ PASSWORD RESET con envío asíncrono (Gmail SMTP)
     path('reset_password/',
-         auth_views.PasswordResetView.as_view(
+         views.FastPasswordResetView.as_view(
              template_name='detection/password_reset.html',
-             email_template_name='detection/password_reset_email.html',
+             email_template_name='detection/password_reset_email.txt',
              subject_template_name='detection/password_reset_subject.txt',
              html_email_template_name='detection/password_reset_email.html',
          ),

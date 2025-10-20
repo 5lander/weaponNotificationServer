@@ -39,7 +39,7 @@ if not SECRET_KEY:
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['weaponnotificationserver.onrender.com','127.0.0.1', 'localhost',]
+ALLOWED_HOSTS = ['weaponnotificationserver.onrender.com','127.0.0.1','localhost',]
 
 
 # Application definition
@@ -191,8 +191,23 @@ EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 EMAIL_HOST = 'smtp.gmail.com'
 EMAIL_PORT = 587
 EMAIL_USE_TLS = True
+EMAIL_USE_SSL = False
 EMAIL_HOST_USER = os.environ['EMAIL_HOST_USER']
 EMAIL_HOST_PASSWORD = os.environ['EMAIL_HOST_PASSWORD']
+DEFAULT_FROM_EMAIL = f"Weapon Detection System <{EMAIL_HOST_USER}>"
+SERVER_EMAIL = EMAIL_HOST_USER
+EMAIL_TIMEOUT = 15
+
+if not EMAIL_HOST_USER or not EMAIL_HOST_PASSWORD:
+    import warnings
+    warnings.warn(
+        "⚠️ EMAIL_HOST_USER o EMAIL_HOST_PASSWORD no configurados. "
+        "Los emails no se enviarán. Revisa tu archivo .env",
+        RuntimeWarning
+    )
+    print("❌ CONFIGURACIÓN DE EMAIL INCOMPLETA")
+else:
+    print(f"✅ Email configurado: {EMAIL_HOST_USER}")
 
 
 #AMAZON S3 CONFIGURATION 
