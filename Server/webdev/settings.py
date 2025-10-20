@@ -41,18 +41,7 @@ DEBUG = True
 
 ALLOWED_HOSTS = ['weaponnotificationserver.onrender.com','0.0.0.0']
 
-IS_RENDER = os.environ.get('RENDER', 'false').lower() == 'true'
 
-if IS_RENDER or not DEBUG:
-    # Producción en Render
-    SITE_DOMAIN = 'weaponnotificationserver.onrender.com'
-    SITE_PROTOCOL = 'https'
-else:
-    # Desarrollo local
-    SITE_DOMAIN = '127.0.0.1:8000'
-    SITE_PROTOCOL = 'http'
-
-print(f"🌐 Dominio configurado: {SITE_PROTOCOL}://{SITE_DOMAIN}")
 
 
 # Application definition
@@ -209,7 +198,7 @@ EMAIL_HOST_USER = os.environ['EMAIL_HOST_USER']
 EMAIL_HOST_PASSWORD = os.environ['EMAIL_HOST_PASSWORD']
 DEFAULT_FROM_EMAIL = f"Weapon Detection System <{EMAIL_HOST_USER}>"
 SERVER_EMAIL = EMAIL_HOST_USER
-EMAIL_TIMEOUT = 15
+EMAIL_TIMEOUT = 50
 
 if not EMAIL_HOST_USER or not EMAIL_HOST_PASSWORD:
     import warnings
@@ -221,6 +210,20 @@ if not EMAIL_HOST_USER or not EMAIL_HOST_PASSWORD:
     print("❌ CONFIGURACIÓN DE EMAIL INCOMPLETA")
 else:
     print(f"✅ Email configurado: {EMAIL_HOST_USER}")
+
+
+IS_RENDER = os.environ.get('RENDER', 'false').lower() == 'true'
+
+if IS_RENDER or not DEBUG:
+    # Producción en Render
+    SITE_DOMAIN = 'weaponnotificationserver.onrender.com'
+    SITE_PROTOCOL = 'https'
+else:
+    # Desarrollo local
+    SITE_DOMAIN = '127.0.0.1:8000'
+    SITE_PROTOCOL = 'http'
+
+print(f"🌐 Dominio configurado: {SITE_PROTOCOL}://{SITE_DOMAIN}")
 
 
 #AMAZON S3 CONFIGURATION 
