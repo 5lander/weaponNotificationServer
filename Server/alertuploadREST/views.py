@@ -29,104 +29,103 @@ def postAlert(request):
 
     if serializer.is_valid():
         serializer.save()
-        print(f"Alert saved successfully. Data: {serializer.data}")
+        print(f"Alerta guardada exitosamente. Datos: {serializer.data}")
         identify_email_sms(serializer)
 
     else:
-        print(f"Serializer validation failed: {serializer.errors}")
-        return JsonResponse({'error':'Unable to process data!'},status=400)
+        print(f"La validación del serializador falló: {serializer.errors}")
+        return JsonResponse({'error':'¡No se pudieron procesar los datos!'},status=400)
 
     return Response(request.META.get('HTTP_AUTHORIZATION'))
 
-# Identifies if the user provided an email or a mobile number
+# Identifica si el usuario proporcionó un correo electrónico o un número de teléfono
 def identify_email_sms(serializer):
     receiver = serializer.data['alertReceiver']
-    image_path = serializer.data.get('image', 'No image path')
+    image_path = serializer.data.get('image', 'Sin ruta de imagen')
     
-    print(f"Processing alert for receiver: {receiver}")
-    print(f"Image path: {image_path}")
+    print(f"Procesando alerta para el receptor: {receiver}")
+    print(f"Ruta de imagen: {image_path}")
 
     if(re.search('^[a-z0-9]+[\._]?[a-z0-9]+[@]\w+[.]\w{2,3}$', receiver)):  
-        print("Valid Email - Sending email...")
+        print("Correo electrónico válido - Enviando correo...")
         send_enhanced_email(serializer)
     elif re.compile("[+593][0-9]{10}").match(receiver):
-        print("Valid Mobile Number - Sending SMS...")
+        print("Número de teléfono válido - Enviando SMS...")
         send_sms(serializer)
     else:
-        print(f"Invalid Email or Mobile number: {receiver}")
+        print(f"Correo electrónico o número de teléfono inválido: {receiver}")
 
 @start_new_thread
 def send_enhanced_email(serializer):
     try:
-        print("Starting enhanced email send process...")
+        print("Iniciando proceso de envío de correo mejorado...")
         
-        # Extraer datos del serializer
+        # Extraer datos del serializador
         alert_data = extract_alert_data(serializer)
         
-        # Crear el email con HTML
+        # Crear el correo con HTML
         subject = f"🚨 ALERTA DE SEGURIDAD - Arma Detectada"
         
-        # Texto plano como fallback
+        # Texto plano como respaldo
         text_content = create_text_email(alert_data)
         
         # Contenido HTML mejorado
         html_content = create_html_email(alert_data)
         
-        # Crear email multipart
+        # Crear correo multipart
         email = EmailMultiAlternatives(
             subject=subject,
             body=text_content,
-            from_email='Weapon Detection System <weapondetectionsystemproject@gmail.com>',
+            from_email='Sistema de Detección de Armas <weaponsys1em@gmail.com>',
             to=[serializer.data['alertReceiver']]
         )
         
-        # Adjuntar version HTML
+        # Adjuntar versión HTML
         email.attach_alternative(html_content, "text/html")
         
-        print(f"Email details:")
-        print(f"  Subject: {subject}")
-        print(f"  To: {serializer.data['alertReceiver']}")
-        print(f"  HTML content length: {len(html_content)} characters")
+        print(f"Detalles del correo:")
+        print(f"  Asunto: {subject}")
+        print(f"  Para: {serializer.data['alertReceiver']}")
+        print(f"  Longitud de contenido HTML: {len(html_content)} caracteres")
         
-        # Enviar email
+        # Enviar correo
         result = email.send(fail_silently=False)
         
-        print(f"Email send result: {result}")
+        print(f"Resultado del envío: {result}")
         if result == 1:
-            print("Enhanced email sent successfully!")
+            print("¡Correo mejorado enviado exitosamente!")
         else:
-            print("Email send failed - no error but result was 0")
+            print("Falló el envío del correo - sin error pero el resultado fue 0")
             
     except Exception as e:
-        print(f"Error sending enhanced email: {e}")
+        print(f"Error al enviar correo mejorado: {e}")
         import traceback
-        print(f"Full traceback: {traceback.format_exc()}")
+        print(f"Rastreo completo: {traceback.format_exc()}")
         
-        # Fallback al email simple
-        print("Attempting fallback to simple email...")
+        # Respaldo al correo simple
+        print("Intentando respaldo a correo simple...")
         send_simple_email_fallback(serializer)
 
 @start_new_thread
 def send_simple_email_fallback(serializer):
-    """Fallback al método original si el email HTML falla"""
+    """Respaldo al método original si el correo HTML falla"""
     try:
         alert_data = extract_alert_data(serializer)
         
         result = send_mail(
             subject='🚨 Alerta de Seguridad - Arma Detectada',
             message=create_text_email(alert_data),
-            from_email='weapondetectionsystemproject@gmail.com',
+            from_email='weaponsys1em@gmail.com',
             recipient_list=[serializer.data['alertReceiver']],
             fail_silently=False,
         )
         
-        print(f"Fallback email result: {result}")
+        print(f"Resultado de correo de respaldo: {result}")
         
     except Exception as e:
-        print(f"Error in fallback email: {e}")
+        print(f"Error en correo de respaldo: {e}")
 
 def extract_alert_data(serializer):
-    """Extrae y organiza los datos de la alerta"""
     data = serializer.data
     
     # Obtener URL de la alerta
@@ -152,7 +151,6 @@ def extract_alert_data(serializer):
     }
 
 def create_text_email(alert_data):
-    """Crea el contenido del email en texto plano"""
     text_template = f"""
 🚨 ALERTA DE SEGURIDAD CRÍTICA 🚨
 
@@ -180,7 +178,6 @@ Generado automáticamente el {alert_data['timestamp'].strftime('%d/%m/%Y a las %
     return text_template.strip()
 
 def create_html_email(alert_data):
-    """Crea el contenido del email en HTML"""
     html_template = f"""
 <!DOCTYPE html>
 <html lang="es">
@@ -338,10 +335,6 @@ def create_html_email(alert_data):
                     <span class="detail-value">{alert_data['confidence']}</span>
                 </div>
                 
-                <div class="detail-row">
-                    <span class="detail-label">👤 Notificado a:</span>
-                    <span class="detail-value">{alert_data['receiver']}</span>
-                </div>
             </div>
             
             <div style="text-align: center;">
@@ -376,11 +369,11 @@ def create_html_email(alert_data):
 """
     return html_template
 
-# Sends SMS
+# Envía SMS
 @start_new_thread
 def send_sms(serializer):
     try:
-        print("Starting SMS send process...")
+        print("Iniciando proceso de envío de SMS...")
         alert_data = extract_alert_data(serializer)
         
         # Mensaje SMS mejorado pero conciso
@@ -392,10 +385,10 @@ ID: {alert_data['alert_id']}"""
         
         client = Client(settings.TWILIO_ACCOUNT_SID, settings.TWILIO_AUTH_TOKEN)
         
-        print(f"SMS details:")
-        print(f"  Message: {sms_message}")
-        print(f"  From: {settings.TWILIO_NUMBER}")
-        print(f"  To: {serializer.data['alertReceiver']}")
+        print(f"Detalles del SMS:")
+        print(f"  Mensaje: {sms_message}")
+        print(f"  De: {settings.TWILIO_NUMBER}")
+        print(f"  Para: {serializer.data['alertReceiver']}")
 
         message = client.messages.create(
             body=sms_message,
@@ -403,15 +396,14 @@ ID: {alert_data['alert_id']}"""
             to=serializer.data['alertReceiver']
         )
         
-        print(f"SMS sent successfully! SID: {message.sid}")
+        print(f"¡SMS enviado exitosamente! SID: {message.sid}")
         
     except Exception as e:
-        print(f"Error sending SMS: {e}")
+        print(f"Error al enviar SMS: {e}")
         import traceback
-        print(f"Full traceback: {traceback.format_exc()}")
+        print(f"Rastreo completo: {traceback.format_exc()}")
 
 def generate_alert_url(image_path):
-    """Genera la URL de la alerta de forma robusta"""
     try:
         if not image_path:
             return 'https://weaponnotificationserver.onrender.com/alert/unknown'
@@ -424,7 +416,7 @@ def generate_alert_url(image_path):
             if name_without_extension:
                 return f'https://weaponnotificationserver.onrender.com/alert/{name_without_extension}'
         
-        # Fallback al método original
+        # Respaldo al método original
         parts_by_dot = str(image_path).split(".")
         if len(parts_by_dot) >= 4:
             parts_by_slash = str(parts_by_dot[3]).split("/")
@@ -434,9 +426,8 @@ def generate_alert_url(image_path):
         return 'https://weaponnotificationserver.onrender.com/alert/processing'
         
     except Exception as e:
-        print(f"Error generating alert URL: {e}")
+        print(f"Error al generar URL de alerta: {e}")
         return 'https://weaponnotificationserver.onrender.com/alert/error'
 
 def split(value, key):
-    """Función auxiliar para dividir strings"""
     return str(value).split(key)

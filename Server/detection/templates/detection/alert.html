@@ -40,18 +40,18 @@
       <!-- Back Button -->
       <a href="{% url 'home' %}" class="back-btn">
         <i class="fas fa-arrow-left"></i>
-        Back to Dashboard
+        Volver al Panel de Control
       </a>
 
       <!-- Alert Header -->
       <div class="alert-header">
         <h1 class="alert-title">
           <i class="fas fa-exclamation-triangle"></i>
-          Weapon Detection Alert
+          Alerta de Detección de Armas
         </h1>
         <span class="alert-status">
           <i class="fas fa-shield-alt"></i>
-          ACTIVE THREAT DETECTED
+          AMENAZA ACTIVA DETECTADA
         </span>
       </div>
 
@@ -61,13 +61,13 @@
         <div class="image-card">
           <h2 class="image-header">
             <i class="fas fa-camera"></i>
-            Detection Evidence
+            Evidencia de Detección
           </h2>
           {% for alert in uploadAlert %}
           <img class="detection-image-large" 
                src='https://weapondetectionsystem.s3.us-east-1.amazonaws.com/media/{{alert.image}}' 
                alt="Weapon Detection Evidence"/>
-          <p class="image-caption">Weapon detected in security footage - {{ alert.dateCreated|date:"F j, Y at g:i A" }}</p>
+          <p class="image-caption">Arma detectada en video de seguridad - {{ alert.dateCreated|date:"F j, Y at g:i A" }}</p>
           {% endfor %}
         </div>
 
@@ -75,39 +75,33 @@
         <div class="info-card">
           <h2 class="info-header">
             <i class="fas fa-info-circle"></i>
-            Alert Details
+            Detalles de la Alerta
           </h2>
           
           <table class="info-table">
             {% for alert in uploadAlert %}
             <tr>
-              <td class="info-label">Location</td>
+              <td class="info-label">Ubicación</td>
               <td class="info-value location-value">
                 <i class="fas fa-map-marker-alt"></i>
                 {{ alert.location }}
               </td>
             </tr>
             <tr>
-              <td class="info-label">Alert Sent To</td>
+              <td class="info-label">Alerta Enviada A</td>
               <td class="info-value receiver-value">
                 <i class="fas fa-user-shield"></i>
                 {{ alert.alertReceiver }}
               </td>
             </tr>
             <tr>
-              <td class="info-label">Detection Time</td>
+              <td class="info-label">Hora de Detección</td>
               <td class="info-value time-value">
                 <i class="fas fa-clock"></i>
                 {{ alert.dateCreated|date:"Y-m-d H:i:s" }}
               </td>
             </tr>
-            <tr>
-              <td class="info-label">Alert Status</td>
-              <td class="info-value">
-                <i class="fas fa-exclamation-circle" style="color: #ef4444;"></i>
-                <span id="alertStatus">Active Monitoring</span>
-              </td>
-            </tr>
+
             {% endfor %}
           </table>
         </div>
@@ -115,15 +109,15 @@
 
       <!-- Actions Section -->
       <div class="actions-section">
-        <h3 class="actions-title">Available Actions</h3>
+        <h3 class="actions-title">Acciones Disponibles</h3>
         <div class="actions-buttons">
           <button onclick="downloadReport()" class="action-btn">
             <i class="fas fa-download"></i>
-            Download Report
+            Descargar Reporte
           </button>
           <button onclick="archiveAlert()" class="action-btn danger" id="archiveBtn">
             <i class="fas fa-archive"></i>
-            Archive Alert
+            Archivar Alerta
           </button>
         </div>
         

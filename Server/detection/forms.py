@@ -15,5 +15,5 @@ class CreateUserForm(UserCreationForm):
 	# Checks if the provided email exists
 	def cleanEmail(self):
 		if User.objects.filter(email=self.cleaned_data['email']).exists():
-			raise forms.ValidationError("The given email is already registered.")
+			raise forms.ValidationError("El correo electrónico proporcionado ya está registrado.")
 		return self.cleaned_data['email']
