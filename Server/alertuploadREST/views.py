@@ -46,7 +46,7 @@ def identify_email_sms(serializer):
     print(f"Procesando alerta para el receptor: {receiver}")
     print(f"Ruta de imagen: {image_path}")
 
-    if(re.search('^[a-z0-9]+[\._]?[a-z0-9]+[@]\w+[.]\w{2,3}$', receiver)):  
+    if(re.search(r'^[a-z0-9]+[\._]?[a-z0-9]+[@]\w+[.]\w{2,3}$', receiver)):  
         print("Correo electrónico válido - Enviando correo...")
         send_enhanced_email(serializer)
     elif re.compile("[+593][0-9]{10}").match(receiver):

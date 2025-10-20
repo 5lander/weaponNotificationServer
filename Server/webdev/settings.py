@@ -39,7 +39,7 @@ if not SECRET_KEY:
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['weaponnotificationserver.onrender.com',]
+ALLOWED_HOSTS = ['weaponnotificationserver.onrender.com','0.0.0.0']
 
 
 
