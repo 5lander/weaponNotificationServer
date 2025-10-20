@@ -14,7 +14,8 @@ from rest_framework.authtoken.models import Token
 from django.conf import settings
 from django.core.paginator import Paginator
 
-
+from django.core.mail import EmailMultiAlternatives
+from django.template.loader import render_to_string
 
 from django.contrib.auth.views import PasswordResetView
 from django.contrib.auth.tokens import default_token_generator
@@ -122,13 +123,13 @@ def alert(request, pk):
 
 class FastPasswordResetView(PasswordResetView):
     """
-    Vista optimizada de Password Reset con envío asíncrono
-    Responde en menos de 1 segundo sin bloquear el servidor
+    Vista de Password Reset con envío SÍNCRONO directo (sin cola)
+    Volvemos al método simple que funcionaba antes
     """
     
     def form_valid(self, form):
         """
-        Procesa el formulario y envía emails de forma asíncrona
+        Procesa el formulario y envía emails de forma SÍNCRONA
         """
         email = form.cleaned_data.get('email', '').strip()
         
@@ -147,17 +148,18 @@ class FastPasswordResetView(PasswordResetView):
         num_users = active_users.count()
         
         if num_users == 0:
-            # Por seguridad, no revelamos si el email existe o no
             logger.info(f"🔍 Reset solicitado para email no registrado: {email}")
         else:
             logger.info(f"🔐 Reset solicitado para {num_users} usuario(s) con email: {email}")
         
-        # Obtener dominio y protocolo del request
-        domain = self.request.get_host()
-        protocol = 'https' if self.request.is_secure() else 'http'
+        # ✅ Obtener dominio desde settings (no del request)
+        domain = settings.SITE_DOMAIN
+        protocol = settings.SITE_PROTOCOL
+        
+        logger.info(f"🌐 Usando dominio: {protocol}://{domain}")
         
         # Procesar cada usuario encontrado
-        emails_encolados = 0
+        emails_enviados = 0
         
         for user in active_users:
             try:
@@ -165,8 +167,8 @@ class FastPasswordResetView(PasswordResetView):
                 token = default_token_generator.make_token(user)
                 uid = urlsafe_base64_encode(force_bytes(user.pk))
                 
-                # Enviar email de forma ASÍNCRONA
-                success = send_password_reset_email(
+                # ✅ ENVÍO DIRECTO (SÍNCRONO) - como antes
+                success = self.send_reset_email_sync(
                     user=user,
                     uid=uid,
                     token=token,
@@ -175,21 +177,97 @@ class FastPasswordResetView(PasswordResetView):
                 )
                 
                 if success:
-                    emails_encolados += 1
-                    logger.info(f"✅ Email encolado para: {user.username}")
+                    emails_enviados += 1
+                    logger.info(f"✅ Email enviado a: {user.username}")
                 else:
-                    logger.error(f"❌ Error encolando email para: {user.username}")
+                    logger.error(f"❌ Error enviando email a: {user.username}")
                     
             except Exception as e:
                 logger.error(f"❌ Error procesando reset para {user.username}: {e}")
         
-        # Log del estado de la cola
-        queue_status = get_queue_status()
-        logger.info(
-            f"📊 Reset completado. Emails encolados: {emails_encolados}. "
-            f"Cola: {queue_status['queue_size']} pendientes"
-        )
+        logger.info(f"📊 Reset completado. Emails enviados: {emails_enviados}")
         
-        # Redirigir INMEDIATAMENTE (sin esperar a que se envíen los emails)
-        # Por seguridad, siempre mostramos éxito aunque el email no exista
+        # Redirigir inmediatamente
         return HttpResponseRedirect(reverse('password_reset_done'))
+    
+    def send_reset_email_sync(self, user, uid, token, domain, protocol):
+        """
+        Envía email de reset de forma SÍNCRONA (directa)
+        Este es el método simple que funcionaba antes
+        """
+        # Validar email
+        if not user.email:
+            logger.error(f"❌ Usuario {user.username} no tiene email")
+            return False
+        
+        # Construir URL de reset
+        reset_url = f"{protocol}://{domain}/reset/{uid}/{token}/"
+        
+        # Contexto para templates
+        context = {
+            'user': user,
+            'email': user.email,
+            'uid': uid,
+            'token': token,
+            'reset_url': reset_url,
+            'protocol': protocol,
+            'domain': domain,
+        }
+        
+        try:
+            # Renderizar templates
+            html_content = render_to_string('detection/password_reset_email.html', context)
+            text_content = render_to_string('detection/password_reset_email.txt', context)
+            
+        except Exception as e:
+            logger.error(f"❌ Error renderizando templates: {e}")
+            
+            # Fallback a texto simple
+            text_content = f"""
+¡Hola {user.username}!
+
+Recibimos una solicitud para restablecer tu contraseña.
+
+Para continuar, haz clic en el siguiente enlace:
+{reset_url}
+
+Este enlace expira en 24 horas.
+
+Si no solicitaste este cambio, ignora este email.
+
+---
+Sistema de Detección de Armas
+            """.strip()
+            
+            html_content = None
+        
+        # Asunto
+        subject = '🔐 Restablecimiento de Contraseña - Sistema de Detección de Armas'
+        
+        try:
+            # ✅ ENVÍO DIRECTO con EmailMultiAlternatives
+            logger.info(f"📧 Enviando email a {user.email}...")
+            
+            email = EmailMultiAlternatives(
+                subject=subject,
+                body=text_content,
+                from_email=settings.DEFAULT_FROM_EMAIL,
+                to=[user.email],
+            )
+            
+            if html_content:
+                email.attach_alternative(html_content, "text/html")
+            
+            # Enviar directamente (sin threads, sin cola)
+            result = email.send(fail_silently=False)
+            
+            if result == 1:
+                logger.info(f"✅ Email enviado exitosamente a {user.email}")
+                return True
+            else:
+                logger.error(f"❌ Email.send() retornó {result}")
+                return False
+                
+        except Exception as e:
+            logger.error(f"❌ Error enviando email a {user.email}: {e}")
+            return False

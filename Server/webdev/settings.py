@@ -41,7 +41,18 @@ DEBUG = True
 
 ALLOWED_HOSTS = ['weaponnotificationserver.onrender.com','0.0.0.0']
 
+IS_RENDER = os.environ.get('RENDER', 'false').lower() == 'true'
 
+if IS_RENDER or not DEBUG:
+    # Producción en Render
+    SITE_DOMAIN = 'weaponnotificationserver.onrender.com'
+    SITE_PROTOCOL = 'https'
+else:
+    # Desarrollo local
+    SITE_DOMAIN = '127.0.0.1:8000'
+    SITE_PROTOCOL = 'http'
+
+print(f"🌐 Dominio configurado: {SITE_PROTOCOL}://{SITE_DOMAIN}")
 
 
 # Application definition
