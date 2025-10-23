@@ -56,7 +56,7 @@ max_requests = 1000
 max_requests_jitter = 50  # Variación aleatoria para evitar reinicios simultáneos
 
 # Preload de la aplicación (carga el código antes de fork workers)
-preload_app = False  # Mejora el tiempo de inicio
+preload_app = True  # Mejora el tiempo de inicio
 
 # ============================================
 # LOGGING
