@@ -45,7 +45,7 @@ def identify_email_sms(serializer):
     print(f"Procesando alerta para el receptor: {receiver}")
     print(f"Ruta de imagen: {image_path}")
 
-    if(re.search('^[a-z0-9]+[\._]?[a-z0-9]+[@]\w+[.]\w{2,3}$', receiver)):  
+    if(re.search('r^[a-z0-9]+[\._]?[a-z0-9]+[@]\w+[.]\w{2,3}$', receiver)):  
         print("Correo electrónico válido - Enviando correo vía SendGrid...")
         send_enhanced_email(serializer)
     elif re.compile("[+593][0-9]{10}").match(receiver):
@@ -406,7 +406,7 @@ ID: {alert_data['alert_id']}"""
 def generate_alert_url(image_path):
     try:
         if not image_path:
-            return 'http://127.0.0.1/alert/unknown'
+            return 'https://weaponnotificationserver.onrender.com/alert/unknown'
         
         # Método robusto usando os.path
         filename = os.path.basename(str(image_path))
@@ -414,20 +414,20 @@ def generate_alert_url(image_path):
         if filename:
             name_without_extension = os.path.splitext(filename)[0]
             if name_without_extension:
-                return f'http://127.0.0.1/alert/{name_without_extension}'
+                return f'https://weaponnotificationserver.onrender.com/alert/{name_without_extension}'
         
         # Respaldo al método original
         parts_by_dot = str(image_path).split(".")
         if len(parts_by_dot) >= 4:
             parts_by_slash = str(parts_by_dot[3]).split("/")
             if len(parts_by_slash) >= 3:
-                return f'http://127.0.0.1/alert/{parts_by_slash[2]}'
+                return f'https://weaponnotificationserver.onrender.com/alert/{parts_by_slash[2]}'
         
-        return 'http://127.0.0.1/alert/processing'
+        return 'https://weaponnotificationserver.onrender.com/alert/processing'
         
     except Exception as e:
         print(f"Error al generar URL de alerta: {e}")
-        return 'http://127.0.0.1/alert/error'
+        return 'https://weaponnotificationserver.onrender.com/alert/error'
 
 def split(value, key):
     return str(value).split(key)

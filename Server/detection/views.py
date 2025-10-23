@@ -23,7 +23,7 @@ from django.utils.encoding import force_bytes
 from django.contrib.auth import get_user_model
 from django.http import HttpResponseRedirect
 from django.urls import reverse
-from .email_utils import send_password_reset_email, get_queue_status
+from .email_sender import send_password_reset_email
 import logging
 
 
@@ -122,14 +122,13 @@ def alert(request, pk):
 
 class FastPasswordResetView(PasswordResetView):
     """
-    Vista optimizada de Password Reset con envío asíncrono
-    Responde en menos de 1 segundo sin bloquear el servidor
+    Vista simplificada de Password Reset con envío asíncrono
+    SIN workers complejos, SIN colas, solo threads simples
     """
     
     def form_valid(self, form):
-        """
-        Procesa el formulario y envía emails de forma asíncrona
-        """
+        """Procesa el formulario y envía emails de forma asíncrona"""
+        
         email = form.cleaned_data.get('email', '').strip()
         
         if not email:
@@ -147,25 +146,23 @@ class FastPasswordResetView(PasswordResetView):
         num_users = active_users.count()
         
         if num_users == 0:
-            # Por seguridad, no revelamos si el email existe o no
+            # Por seguridad, no revelamos si el email existe
             logger.info(f"🔍 Reset solicitado para email no registrado: {email}")
         else:
-            logger.info(f"🔐 Reset solicitado para {num_users} usuario(s) con email: {email}")
+            logger.info(f"🔐 Reset solicitado para {num_users} usuario(s): {email}")
         
-        # Obtener dominio y protocolo del request
+        # Obtener dominio y protocolo
         domain = self.request.get_host()
         protocol = 'https' if self.request.is_secure() else 'http'
         
-        # Procesar cada usuario encontrado
-        emails_encolados = 0
-        
+        # Enviar emails (de forma asíncrona, no bloquea)
         for user in active_users:
             try:
-                # Generar token único de reset
+                # Generar token único
                 token = default_token_generator.make_token(user)
                 uid = urlsafe_base64_encode(force_bytes(user.pk))
                 
-                # Enviar email de forma ASÍNCRONA
+                # Enviar email en thread (retorna inmediatamente)
                 success = send_password_reset_email(
                     user=user,
                     uid=uid,
@@ -175,21 +172,15 @@ class FastPasswordResetView(PasswordResetView):
                 )
                 
                 if success:
-                    emails_encolados += 1
-                    logger.info(f"✅ Email encolado para: {user.username}")
+                    logger.info(f"✅ Email programado para: {user.username}")
                 else:
-                    logger.error(f"❌ Error encolando email para: {user.username}")
+                    logger.error(f"❌ Error programando email para: {user.username}")
                     
             except Exception as e:
                 logger.error(f"❌ Error procesando reset para {user.username}: {e}")
         
-        # Log del estado de la cola
-        queue_status = get_queue_status()
-        logger.info(
-            f"📊 Reset completado. Emails encolados: {emails_encolados}. "
-            f"Cola: {queue_status['queue_size']} pendientes"
-        )
-        
-        # Redirigir INMEDIATAMENTE (sin esperar a que se envíen los emails)
-        # Por seguridad, siempre mostramos éxito aunque el email no exista
+        # Redirigir INMEDIATAMENTE (el email se envía en background)
+        logger.info(f"✅ Reset procesado para: {email}")
         return HttpResponseRedirect(reverse('password_reset_done'))
+
+
