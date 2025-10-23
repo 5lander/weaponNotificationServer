@@ -1,50 +1,79 @@
 """
-Sistema de envío de emails SIMPLE para SendGrid en Render
-Sin workers, sin colas, sin problemas
+Sistema de envío de emails usando SendGrid API HTTP (no SMTP)
+SMTP está bloqueado en Render - usamos HTTP API que funciona perfectamente
 """
 from threading import Thread
-from django.core.mail import EmailMultiAlternatives
 from django.template.loader import render_to_string
 from django.conf import settings
 import logging
+import os
 
 logger = logging.getLogger(__name__)
+
+# Intentar importar sendgrid
+try:
+    from sendgrid import SendGridAPIClient
+    from sendgrid.helpers.mail import Mail, Email, To, Content
+    SENDGRID_AVAILABLE = True
+    logger.info("✅ SendGrid API disponible")
+except ImportError:
+    SENDGRID_AVAILABLE = False
+    logger.warning("⚠️ SendGrid no instalado - pip install sendgrid")
 
 
 def send_email_async(subject, text_content, to_email, html_content=None, from_email=None):
     """
-    Envía un email en un thread separado (no bloquea la respuesta HTTP)
-    Simple, directo, confiable
+    Envía un email usando SendGrid API HTTP (no SMTP bloqueado por Render)
+    Se ejecuta en un thread separado para no bloquear la respuesta
     """
     if not from_email:
         from_email = settings.DEFAULT_FROM_EMAIL
     
     def _send():
         try:
-            logger.info(f"📧 Enviando email a {to_email} vía SendGrid...")
+            if not SENDGRID_AVAILABLE:
+                logger.error("❌ SendGrid no instalado")
+                logger.error("   Ejecuta: pip install sendgrid")
+                return False
             
-            email = EmailMultiAlternatives(
+            # Obtener API Key
+            api_key = os.environ.get('SENDGRID_API_KEY', settings.EMAIL_HOST_PASSWORD)
+            
+            if not api_key or not api_key.startswith('SG.'):
+                logger.error("❌ SENDGRID_API_KEY no configurado o inválido")
+                logger.error(f"   API Key actual: {api_key[:20] if api_key else 'None'}...")
+                return False
+            
+            logger.info(f"📧 Enviando email a {to_email} vía SendGrid API HTTP...")
+            
+            # Crear mensaje con SendGrid API
+            message = Mail(
+                from_email=Email(from_email),
+                to_emails=To(to_email),
                 subject=subject,
-                body=text_content,
-                from_email=from_email,
-                to=[to_email],
+                plain_text_content=Content("text/plain", text_content)
             )
             
+            # Agregar HTML si existe
             if html_content:
-                email.attach_alternative(html_content, "text/html")
+                message.add_content(Content("text/html", html_content))
             
-            # SendGrid responde en 1-3 segundos típicamente
-            result = email.send(fail_silently=False)
+            # Enviar vía API HTTP (puerto 443 - NO bloqueado por Render)
+            sg = SendGridAPIClient(api_key)
+            response = sg.send(message)
             
-            if result == 1:
+            # SendGrid API retorna 202 si fue aceptado
+            if response.status_code == 202:
                 logger.info(f"✅ Email enviado exitosamente a {to_email}")
+                logger.info(f"   Status: {response.status_code} (Accepted)")
                 return True
             else:
-                logger.error(f"❌ Email.send() retornó {result}")
+                logger.warning(f"⚠️ SendGrid retornó status inesperado: {response.status_code}")
+                logger.warning(f"   Body: {response.body}")
                 return False
                 
         except Exception as e:
-            logger.error(f"❌ Error enviando email: {str(e)}")
+            logger.error(f"❌ Error enviando email vía SendGrid API: {str(e)}")
             import traceback
             logger.error(traceback.format_exc())
             return False
@@ -53,14 +82,14 @@ def send_email_async(subject, text_content, to_email, html_content=None, from_em
     thread = Thread(target=_send, daemon=True)
     thread.start()
     
-    logger.info(f"🚀 Email encolado para {to_email} (respuesta inmediata)")
+    logger.info(f"🚀 Email encolado para {to_email} vía API HTTP")
     return True
 
 
 def send_password_reset_email(user, uid, token, domain, protocol='https'):
     """
-    Envía email de password reset de forma asíncrona
-    Retorna inmediatamente
+    Envía email de password reset usando SendGrid API
+    Retorna inmediatamente sin bloquear
     """
     if not user.email:
         logger.error(f"❌ Usuario {user.username} no tiene email")
@@ -81,9 +110,10 @@ def send_password_reset_email(user, uid, token, domain, protocol='https'):
     }
     
     try:
-        # Renderizar templates (estos existen en tu código)
+        # Renderizar templates
         html_content = render_to_string('detection/password_reset_email.html', context)
         text_content = render_to_string('detection/password_reset_email.txt', context)
+        
     except Exception as e:
         logger.error(f"❌ Error renderizando templates: {e}")
         
@@ -107,12 +137,10 @@ Sistema de Detección de Armas
     # Asunto
     subject = '🔐 Restablecimiento de Contraseña - Sistema de Detección de Armas'
     
-    # Enviar (no bloquea)
+    # Enviar usando API HTTP (no bloquea)
     return send_email_async(
         subject=subject,
         text_content=text_content,
         to_email=user.email,
         html_content=html_content
     )
-
-
