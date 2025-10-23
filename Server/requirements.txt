@@ -11,8 +11,8 @@ djangorestframework==3.14.0
 django-extensions==3.2.3
 django-filter==24.3
 
-# Database
-psycopg2-binary==2.9.9
+# Database - psycopg3 para Python 3.13+ 
+psycopg[binary]==3.2.3
 dj-database-url==2.2.0
 
 # AWS S3
