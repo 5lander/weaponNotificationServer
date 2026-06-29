@@ -1,5 +1,6 @@
 from django.urls import path
 from . import views
+from . import push_views
 from django.contrib.auth import views as auth_views
 
 urlpatterns = [
@@ -7,6 +8,12 @@ urlpatterns = [
     path('register/', views.registerPage, name='register'),
     path('', views.home, name='home'),
     path('logout/', views.logoutUser, name='logout'),
+
+    # 🔔 Web Push (VAPID)
+    path('sw.js', push_views.service_worker, name='service_worker'),
+    path('push/public_key/', push_views.public_key, name='push_public_key'),
+    path('push/subscribe/', push_views.subscribe, name='push_subscribe'),
+    path('push/unsubscribe/', push_views.unsubscribe, name='push_unsubscribe'),
 
     # ✅ PASSWORD RESET con envío asíncrono (Gmail SMTP)
     path('reset_password/',

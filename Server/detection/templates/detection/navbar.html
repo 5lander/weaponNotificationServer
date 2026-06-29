@@ -231,6 +231,11 @@
         ¡Hola, {{ request.user }}!
       </li>
       <li>
+        <button id="enablePushBtn" type="button" class="logout-btn" style="background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%); border: none; cursor: pointer;">
+          🔔 Activar notificaciones
+        </button>
+      </li>
+      <li>
         <a class="logout-btn" href="{% url 'logout' %}">
           <i class="fas fa-sign-out-alt"></i>
           Cerrar sesión
@@ -256,47 +261,9 @@
       }
     });
 
-    // Variable para controlar navegación interna
-    let isInternalNavigation = false;
-
-    // Detectar navegación interna
-    const internalLinks = document.querySelectorAll('a[href^="/"], a[href*="{% url"]');
-    internalLinks.forEach(link => {
-        link.addEventListener('click', function() {
-            isInternalNavigation = true;
-            setTimeout(() => {
-                isInternalNavigation = false;
-            }, 100);
-        });
-    });
-
-    // Auto-logout inteligente (solo al cerrar pestaña real)
-    window.addEventListener('beforeunload', function(e) {
-        if (!isInternalNavigation) {
-            const logoutUrl = "{% url 'logout' %}";
-            const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]')?.value || 
-                             document.querySelector('meta[name=csrf-token]')?.getAttribute('content');
-            
-            if (navigator.sendBeacon && csrfToken) {
-                const formData = new FormData();
-                formData.append('csrfmiddlewaretoken', csrfToken);
-                navigator.sendBeacon(logoutUrl, formData);
-            }
-        }
-    });
-
-    window.addEventListener('pagehide', function(e) {
-        if (e.persisted === false && !isInternalNavigation) {
-            const logoutUrl = "{% url 'logout' %}";
-            const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]')?.value || 
-                             document.querySelector('meta[name=csrf-token]')?.getAttribute('content');
-            
-            if (navigator.sendBeacon && csrfToken) {
-                const formData = new FormData();
-                formData.append('csrfmiddlewaretoken', csrfToken);
-                navigator.sendBeacon(logoutUrl, formData);
-            }
-        }
-    });
+    // NOTA: el cierre de sesión al cerrar el navegador ahora lo gestiona el
+    // servidor con SESSION_EXPIRE_AT_BROWSER_CLOSE (+ borrado de sesiones en el
+    // arranque). Se eliminó el parche con sendBeacon/beforeunload por redundante
+    // y poco fiable.
   });
 </script>
