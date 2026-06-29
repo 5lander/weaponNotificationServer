@@ -8,7 +8,6 @@ from rest_framework.exceptions import ValidationError
 
 from django.http import JsonResponse
 
-from twilio.rest import Client
 from threading import Thread
 import re
 import os
@@ -29,7 +28,7 @@ def postAlert(request):
     if serializer.is_valid():
         serializer.save()
         print(f"Alerta guardada exitosamente. Datos: {serializer.data}")
-        identify_email_sms(serializer)
+        send_email_alert(serializer)
         # 🔔 Notificación Web Push al dueño de la alerta (en segundo plano)
         send_web_push(serializer.instance)
 
@@ -48,22 +47,27 @@ def send_web_push(alert_instance):
     except Exception as e:
         print(f"Error al enviar notificación web push: {e}")
 
-# Identifica si el usuario proporcionó un correo electrónico o un número de teléfono
-def identify_email_sms(serializer):
+# Validación de correo electrónico (el cliente solo admite correo).
+EMAIL_REGEX = re.compile(r'^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$')
+
+
+def is_valid_email(value):
+    return bool(EMAIL_REGEX.match((value or '').strip()))
+
+
+# Envía la alerta por correo electrónico vía SendGrid.
+def send_email_alert(serializer):
     receiver = serializer.data['alertReceiver']
     image_path = serializer.data.get('image', 'Sin ruta de imagen')
-    
+
     print(f"Procesando alerta para el receptor: {receiver}")
     print(f"Ruta de imagen: {image_path}")
 
-    if(re.search('r^[a-z0-9]+[\._]?[a-z0-9]+[@]\w+[.]\w{2,3}$', receiver)):  
+    if is_valid_email(receiver):
         print("Correo electrónico válido - Enviando correo vía SendGrid...")
         send_enhanced_email(serializer)
-    elif re.compile("[+593][0-9]{10}").match(receiver):
-        print("Número de teléfono válido - Enviando SMS...")
-        send_sms(serializer)
     else:
-        print(f"Correo electrónico o número de teléfono inválido: {receiver}")
+        print(f"Correo electrónico inválido: {receiver}")
 
 @start_new_thread
 def send_enhanced_email(serializer):
@@ -379,40 +383,6 @@ def create_html_email(alert_data):
 </html>
 """
     return html_template
-
-# Envía SMS
-@start_new_thread
-def send_sms(serializer):
-    try:
-        print("Iniciando proceso de envío de SMS...")
-        alert_data = extract_alert_data(serializer)
-        
-        # Mensaje SMS mejorado pero conciso
-        sms_message = f"""🚨 ALERTA SEGURIDAD
-Arma detectada - {alert_data['timestamp'].strftime('%d/%m %H:%M')}
-Ubicación: {alert_data['location']}
-Ver: {alert_data['alert_url']}
-ID: {alert_data['alert_id']}"""
-        
-        client = Client(settings.TWILIO_ACCOUNT_SID, settings.TWILIO_AUTH_TOKEN)
-        
-        print(f"Detalles del SMS:")
-        print(f"  Mensaje: {sms_message}")
-        print(f"  De: {settings.TWILIO_NUMBER}")
-        print(f"  Para: {serializer.data['alertReceiver']}")
-
-        message = client.messages.create(
-            body=sms_message,
-            from_=settings.TWILIO_NUMBER,
-            to=serializer.data['alertReceiver']
-        )
-        
-        print(f"¡SMS enviado exitosamente! SID: {message.sid}")
-        
-    except Exception as e:
-        print(f"Error al enviar SMS: {e}")
-        import traceback
-        print(f"Rastreo completo: {traceback.format_exc()}")
 
 def generate_alert_url(image_path):
     try:

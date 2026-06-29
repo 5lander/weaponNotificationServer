@@ -21,7 +21,7 @@ Este documento describe dos cambios en el servidor Django:
 - Las suscripciones del navegador se guardan en el modelo `PushSubscription`,
   ligadas al usuario de la sesión web.
 - El envío ocurre en el flujo de subida de alertas (`POST /api/images/`), en un
-  hilo en segundo plano, junto al email/SMS ya existentes.
+  hilo en segundo plano, junto al correo (SendGrid) ya existente.
 
 ### Componentes
 | Componente | Ruta |
@@ -51,8 +51,8 @@ VAPID_PUBLIC_KEY=<clave_publica_base64url>
 VAPID_PRIVATE_KEY=<clave_privada_base64url>
 VAPID_ADMIN_EMAIL=mailto:tu-correo@dominio.com
 ```
-> Si `VAPID_*` está vacío, el envío de push se omite con un *warning*; el resto del
-> flujo de alertas (email/SMS) sigue funcionando.
+> Si `VAPID_*` está vacío, el envío de push se omite con un *warning*; el envío de
+> alertas por correo (SendGrid) sigue funcionando.
 
 ### Migración
 Se añade la tabla `PushSubscription`:
