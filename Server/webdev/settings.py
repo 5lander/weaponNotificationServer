@@ -172,11 +172,6 @@ STATICFILES_DIRS =[
 ]
 MEDIA_ROOT = 'static/images'
 
-# Twilio configuration
-TWILIO_ACCOUNT_SID = os.environ['TWILIO_ACCOUNT_SID']
-TWILIO_AUTH_TOKEN = os.environ['TWILIO_AUTH_TOKEN']
-TWILIO_NUMBER = os.environ['TWILIO_NUMBER'] 
-
 # ==========================================
 # ✅ SENDGRID EMAIL CONFIGURATION (NUEVO)
 # ==========================================
