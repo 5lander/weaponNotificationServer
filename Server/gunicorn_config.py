@@ -124,6 +124,24 @@ def on_starting(server):
     print(f"   Max requests: {max_requests}")
     print("="*60 + "\n")
 
+    # ============================================
+    # 🔒 SEGURIDAD: arranque en frío sin sesiones
+    # ============================================
+    # Borra TODAS las sesiones activas una sola vez, en el proceso maestro,
+    # antes de crear los workers. Así, tras un reinicio/deploy del servidor,
+    # nadie queda autenticado y se exige login manual (evita el auto-login).
+    try:
+        os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'webdev.settings')
+        import django
+        django.setup()
+        from django.contrib.sessions.models import Session
+        total = Session.objects.count()
+        Session.objects.all().delete()
+        print(f"🔒 Arranque en frío: {total} sesión(es) eliminada(s). Se exigirá login.\n")
+    except Exception as e:
+        # No abortar el arranque si la BD aún no está disponible.
+        print(f"⚠️ No se pudieron limpiar las sesiones al arrancar: {e}\n")
+
 
 def on_reload(server):
     """Se ejecuta cuando se recarga la aplicación"""

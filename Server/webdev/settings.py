@@ -60,6 +60,24 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
 
+# ==========================================
+# 🔐 SEGURIDAD DE SESIONES
+# ==========================================
+# Evita el "auto-login" tras reiniciar el servidor:
+#  - La sesión termina al cerrar el navegador.
+#  - Caduca por inactividad (expiración deslizante).
+#  - Además, todas las sesiones se borran en el arranque en frío
+#    (ver `flush_all_sessions` + hook `on_starting` de gunicorn_config.py).
+SESSION_EXPIRE_AT_BROWSER_CLOSE = True   # cerrar el navegador termina la sesión
+SESSION_COOKIE_AGE = 1800                # 30 min de inactividad
+SESSION_SAVE_EVERY_REQUEST = True        # expiración deslizante (se renueva con actividad)
+SESSION_COOKIE_HTTPONLY = True
+SESSION_COOKIE_SAMESITE = 'Lax'
+# Cookies solo por HTTPS en producción. Se activa con SECURE_COOKIES=true
+# (p. ej. en Render); por defecto False para no romper el desarrollo local en http.
+SESSION_COOKIE_SECURE = os.environ.get('SECURE_COOKIES', 'False').lower() == 'true'
+CSRF_COOKIE_SECURE = os.environ.get('SECURE_COOKIES', 'False').lower() == 'true'
+
 ROOT_URLCONF = 'webdev.urls'
 
 TEMPLATES = [
@@ -226,3 +244,15 @@ AWS_DEFAULT_ACL=None
 PUBLIC_MEDIA_LOCATION = 'media'
 MEDIA_URL = f'https://{AWS_S3_CUSTOM_DOMAIN}/{PUBLIC_MEDIA_LOCATION}/'
 DEFAULT_FILE_STORAGE = 'webdev.storage_backends.PublicMediaStorage'
+
+# ==========================================
+# 🔔 WEB PUSH (VAPID)
+# ==========================================
+# Claves del par VAPID para notificaciones Web Push (estándar abierto, sin FCM).
+# Genera el par con:  python manage.py generate_vapid_keys
+# y guarda los valores en variables de entorno (.env local / env vars en Render).
+# NUNCA hardcodear estas claves en el repositorio.
+VAPID_PUBLIC_KEY = os.environ.get('VAPID_PUBLIC_KEY', '')
+VAPID_PRIVATE_KEY = os.environ.get('VAPID_PRIVATE_KEY', '')
+# El claim "sub" del JWT VAPID: un mailto o una URL de contacto del responsable.
+VAPID_ADMIN_EMAIL = os.environ.get('VAPID_ADMIN_EMAIL', 'mailto:admin@weapondetection.com')

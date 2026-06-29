@@ -5,6 +5,7 @@ from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth import authenticate, login, logout
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
+from django.views.decorators.csrf import ensure_csrf_cookie
 
 from .forms import CreateUserForm
 from .filters import DetectionFilter
@@ -71,6 +72,7 @@ def logoutUser(request):
 	return redirect('login')
 
 @login_required(login_url='login')
+@ensure_csrf_cookie
 def home(request):
     # Obtener el token del usuario
     token = Token.objects.get(user=request.user)

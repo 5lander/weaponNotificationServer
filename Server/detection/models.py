@@ -35,3 +35,18 @@ class UploadAlert(models.Model):
 def create_auth_token(sender, instance=None, created=False, **kwargs):
     if created:
         Token.objects.create(user=instance)
+
+
+# Web Push: suscripción del navegador asociada a un usuario.
+class PushSubscription(models.Model):
+    user = models.ForeignKey(
+        User, on_delete=models.CASCADE, related_name='push_subscriptions'
+    )
+    endpoint = models.URLField(max_length=500, unique=True)
+    p256dh = models.CharField(max_length=200)   # clave pública del cliente
+    auth = models.CharField(max_length=100)     # secreto de autenticación
+    user_agent = models.CharField(max_length=300, blank=True, default='')
+    created = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"PushSubscription({self.user.username})"
