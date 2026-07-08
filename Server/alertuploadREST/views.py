@@ -72,71 +72,62 @@ def send_email_alert(serializer):
 @start_new_thread
 def send_enhanced_email(serializer):
     try:
-        print("Iniciando proceso de envío de correo mejorado vía SendGrid...")
-        
+        print("Iniciando proceso de envío de correo de alerta vía Brevo API HTTP...")
+
         # Extraer datos del serializador
         alert_data = extract_alert_data(serializer)
-        
+
         # Crear el correo con HTML
         subject = f"🚨 ALERTA DE SEGURIDAD - Arma Detectada"
-        
+
         # Texto plano como respaldo
         text_content = create_text_email(alert_data)
-        
+
         # Contenido HTML mejorado
         html_content = create_html_email(alert_data)
-        
-        # Crear correo multipart
-        email = EmailMultiAlternatives(
-            subject=subject,
-            body=text_content,
-            from_email=settings.DEFAULT_FROM_EMAIL,
-            to=[serializer.data['alertReceiver']]
-        )
-        
-        # Adjuntar versión HTML
-        email.attach_alternative(html_content, "text/html")
-        
+
+        receiver = serializer.data['alertReceiver']
+
         print(f"Detalles del correo:")
         print(f"  Asunto: {subject}")
-        print(f"  Para: {serializer.data['alertReceiver']}")
+        print(f"  Para: {receiver}")
         print(f"  De: {settings.DEFAULT_FROM_EMAIL}")
         print(f"  Longitud de contenido HTML: {len(html_content)} caracteres")
-        
-        # Enviar correo vía SendGrid
-        result = email.send(fail_silently=False)
-        
-        print(f"Resultado del envío: {result}")
-        if result == 1:
-            print("✅ Correo mejorado enviado exitosamente vía SendGrid!")
-        else:
-            print("Falló el envío del correo - sin error pero el resultado fue 0")
-            
+
+        # IMPORTANTE: Render bloquea el SMTP saliente. Se envía por la API HTTP
+        # de Brevo (puerto 443), el mismo camino que el reset de contraseña.
+        from detection.email_sender import send_email_async
+        send_email_async(
+            subject=subject,
+            text_content=text_content,
+            to_email=receiver,
+            html_content=html_content,
+        )
+        print("✅ Correo de alerta encolado vía Brevo API HTTP!")
+
     except Exception as e:
         print(f"Error al enviar correo mejorado: {e}")
         import traceback
         print(f"Rastreo completo: {traceback.format_exc()}")
-        
+
         # Respaldo al correo simple
         print("Intentando respaldo a correo simple...")
         send_simple_email_fallback(serializer)
 
 @start_new_thread
 def send_simple_email_fallback(serializer):
-    """Respaldo al método original si el correo HTML falla"""
+    """Respaldo simple (solo texto) también vía API HTTP de Brevo."""
     try:
         alert_data = extract_alert_data(serializer)
-        
-        result = send_mail(
+
+        from detection.email_sender import send_email_async
+        send_email_async(
             subject='🚨 Alerta de Seguridad - Arma Detectada',
-            message=create_text_email(alert_data),
-            from_email=settings.DEFAULT_FROM_EMAIL,
-            recipient_list=[serializer.data['alertReceiver']],
-            fail_silently=False,
+            text_content=create_text_email(alert_data),
+            to_email=serializer.data['alertReceiver'],
         )
-        
-        print(f"Resultado de correo de respaldo vía SendGrid: {result}")
-        
+        print("Correo de respaldo encolado vía Brevo API HTTP")
+
     except Exception as e:
         print(f"Error en correo de respaldo: {e}")
 

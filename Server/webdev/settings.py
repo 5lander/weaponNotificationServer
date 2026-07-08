@@ -173,53 +173,54 @@ STATICFILES_DIRS =[
 MEDIA_ROOT = 'static/images'
 
 # ==========================================
-# ✅ SENDGRID EMAIL CONFIGURATION (NUEVO)
+# ✅ GMAIL SMTP EMAIL CONFIGURATION
 # ==========================================
+# Se usa Gmail vía SMTP con una "App Password" (contraseña de aplicación).
+# Credenciales por variables de entorno (.env / Render):
+#   EMAIL_HOST_USER      = tu-correo@gmail.com
+#   EMAIL_HOST_PASSWORD  = app password de 16 caracteres (sin espacios)
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
-EMAIL_HOST = 'smtp.sendgrid.net'
-EMAIL_PORT = 587
+EMAIL_HOST = os.environ.get('EMAIL_HOST', 'smtp.gmail.com')
+EMAIL_PORT = int(os.environ.get('EMAIL_PORT', '587'))
 EMAIL_USE_TLS = True
 EMAIL_USE_SSL = False
-EMAIL_HOST_USER = 'apikey'  # ⚠️ Siempre es 'apikey' para SendGrid
-EMAIL_HOST_PASSWORD = os.environ.get('SENDGRID_API_KEY', '')
-DEFAULT_FROM_EMAIL = os.environ.get('SENDGRID_FROM_EMAIL', 'noreply@weapondetection.com')
+EMAIL_HOST_USER = os.environ.get('EMAIL_HOST_USER', '')
+# Se limpian espacios: Google muestra la app password en bloques de 4 (xxxx xxxx ...).
+EMAIL_HOST_PASSWORD = os.environ.get('EMAIL_HOST_PASSWORD', '').replace(' ', '')
+DEFAULT_FROM_EMAIL = os.environ.get('DEFAULT_FROM_EMAIL', EMAIL_HOST_USER or 'noreply@weapondetection.com')
 SERVER_EMAIL = DEFAULT_FROM_EMAIL
-EMAIL_TIMEOUT = 30  # SendGrid es más rápido que Gmail
+EMAIL_TIMEOUT = 30
 
-# Validación de configuración de SendGrid
-SENDGRID_API_KEY = os.environ.get('SENDGRID_API_KEY')
-SENDGRID_FROM_EMAIL = os.environ.get('SENDGRID_FROM_EMAIL')
+# ==========================================
+# ✅ BREVO API HTTP (envío real de correos)
+# ==========================================
+# Render bloquea el SMTP saliente, así que alertas y reset de contraseña se
+# envían por la API HTTP de Brevo (puerto 443). La API key empieza con 'xkeysib-'.
+# El remitente (DEFAULT_FROM_EMAIL) DEBE estar verificado en Brevo (Senders).
+BREVO_API_KEY = os.environ.get('BREVO_API_KEY', '')
+if not BREVO_API_KEY:
+    print("\n[!] BREVO_API_KEY no configurado - los correos NO se enviaran.\n")
 
-if not SENDGRID_API_KEY:
+if not EMAIL_HOST_USER or not EMAIL_HOST_PASSWORD:
     import warnings
     warnings.warn(
-        "⚠️ SENDGRID_API_KEY no configurado. "
-        "Los emails no se enviarán. Revisa tu archivo .env",
+        "⚠️ Gmail no configurado. Los emails no se enviarán. "
+        "Agrega EMAIL_HOST_USER y EMAIL_HOST_PASSWORD a tu .env / Render.",
         RuntimeWarning
     )
     print("\n" + "="*60)
-    print("❌ CONFIGURACIÓN DE SENDGRID INCOMPLETA")
+    print("[X] CONFIGURACION DE GMAIL INCOMPLETA")
     print("="*60)
-    print("Necesitas agregar a tu .env:")
-    print("  SENDGRID_API_KEY=tu-api-key-aqui")
-    print("  SENDGRID_FROM_EMAIL=tu-email-verificado@tudominio.com")
+    print("Necesitas agregar a tu .env / Render:")
+    print("  EMAIL_HOST_USER=tu-correo@gmail.com")
+    print("  EMAIL_HOST_PASSWORD=app-password-de-16-caracteres")
     print("="*60 + "\n")
-elif not SENDGRID_FROM_EMAIL:
-    import warnings
-    warnings.warn(
-        "⚠️ SENDGRID_FROM_EMAIL no configurado. "
-        "Usando email por defecto, pero debes verificarlo en SendGrid.",
-        RuntimeWarning
-    )
-    print("\n⚠️ SENDGRID_FROM_EMAIL no configurado - usando default\n")
 else:
     print("\n" + "="*60)
-    print("✅ SENDGRID CONFIGURADO CORRECTAMENTE")
+    print("[OK] GMAIL SMTP CONFIGURADO")
     print("="*60)
-    print(f"   From Email: {SENDGRID_FROM_EMAIL}")
-    print(f"   API Key: {'*' * 20}{SENDGRID_API_KEY[-8:]}")
-    print(f"   SMTP Host: {EMAIL_HOST}")
-    print(f"   SMTP Port: {EMAIL_PORT}")
+    print(f"   From Email: {DEFAULT_FROM_EMAIL}")
+    print(f"   SMTP Host: {EMAIL_HOST}:{EMAIL_PORT}")
     print("="*60 + "\n")
 
 # Amazon S3 Configuration

@@ -1,88 +1,78 @@
 """
-Sistema de envío de emails usando SendGrid API HTTP (no SMTP)
-SMTP está bloqueado en Render - usamos HTTP API que funciona perfectamente
+Sistema de envío de emails usando la API HTTP de Brevo (Sendinblue).
+Render bloquea el SMTP saliente (puerto 587), por eso se usa la API HTTP
+(https://api.brevo.com/v3/smtp/email, puerto 443) que NO está bloqueada.
 """
 from threading import Thread
 from django.template.loader import render_to_string
 from django.conf import settings
 import logging
 import os
+import requests
 
 logger = logging.getLogger(__name__)
 
-# Intentar importar sendgrid
-try:
-    from sendgrid import SendGridAPIClient
-    from sendgrid.helpers.mail import Mail, Email, To, Content
-    SENDGRID_AVAILABLE = True
-    logger.info("✅ SendGrid API disponible")
-except ImportError:
-    SENDGRID_AVAILABLE = False
-    logger.warning("⚠️ SendGrid no instalado - pip install sendgrid")
+BREVO_API_URL = "https://api.brevo.com/v3/smtp/email"
+
+
+def _get_brevo_api_key():
+    """API key de Brevo (empieza con 'xkeysib-')."""
+    return os.environ.get('BREVO_API_KEY', getattr(settings, 'BREVO_API_KEY', '') or '')
 
 
 def send_email_async(subject, text_content, to_email, html_content=None, from_email=None):
     """
-    Envía un email usando SendGrid API HTTP (no SMTP bloqueado por Render)
-    Se ejecuta en un thread separado para no bloquear la respuesta
+    Envía un email usando la API HTTP de Brevo (no SMTP bloqueado por Render).
+    Se ejecuta en un thread separado para no bloquear la respuesta HTTP.
     """
     if not from_email:
         from_email = settings.DEFAULT_FROM_EMAIL
-    
+
     def _send():
         try:
-            if not SENDGRID_AVAILABLE:
-                logger.error("❌ SendGrid no instalado")
-                logger.error("   Ejecuta: pip install sendgrid")
+            api_key = _get_brevo_api_key()
+            if not api_key:
+                logger.error("❌ BREVO_API_KEY no configurado (revisa .env / Render)")
                 return False
-            
-            # Obtener API Key
-            api_key = os.environ.get('SENDGRID_API_KEY', settings.EMAIL_HOST_PASSWORD)
-            
-            if not api_key or not api_key.startswith('SG.'):
-                logger.error("❌ SENDGRID_API_KEY no configurado o inválido")
-                logger.error(f"   API Key actual: {api_key[:20] if api_key else 'None'}...")
-                return False
-            
-            logger.info(f"📧 Enviando email a {to_email} vía SendGrid API HTTP...")
-            
-            # Crear mensaje con SendGrid API
-            message = Mail(
-                from_email=Email(from_email),
-                to_emails=To(to_email),
-                subject=subject,
-                plain_text_content=Content("text/plain", text_content)
-            )
-            
-            # Agregar HTML si existe
+
+            logger.info(f"📧 Enviando email a {to_email} vía Brevo API HTTP...")
+
+            payload = {
+                "sender": {"email": from_email, "name": "Weapon Detection System"},
+                "to": [{"email": to_email}],
+                "subject": subject,
+                "textContent": text_content,
+            }
             if html_content:
-                message.add_content(Content("text/html", html_content))
-            
-            # Enviar vía API HTTP (puerto 443 - NO bloqueado por Render)
-            sg = SendGridAPIClient(api_key)
-            response = sg.send(message)
-            
-            # SendGrid API retorna 202 si fue aceptado
-            if response.status_code == 202:
-                logger.info(f"✅ Email enviado exitosamente a {to_email}")
-                logger.info(f"   Status: {response.status_code} (Accepted)")
+                payload["htmlContent"] = html_content
+
+            headers = {
+                "api-key": api_key,
+                "Content-Type": "application/json",
+                "accept": "application/json",
+            }
+
+            response = requests.post(BREVO_API_URL, json=payload, headers=headers, timeout=15)
+
+            # Brevo devuelve 201 (Created) cuando acepta el mensaje.
+            if response.status_code in (200, 201):
+                logger.info(f"✅ Email enviado exitosamente a {to_email} (status {response.status_code})")
                 return True
             else:
-                logger.warning(f"⚠️ SendGrid retornó status inesperado: {response.status_code}")
-                logger.warning(f"   Body: {response.body}")
+                logger.warning(f"⚠️ Brevo devolvió status inesperado: {response.status_code}")
+                logger.warning(f"   Body: {response.text}")
                 return False
-                
+
         except Exception as e:
-            logger.error(f"❌ Error enviando email vía SendGrid API: {str(e)}")
+            logger.error(f"❌ Error enviando email vía Brevo API: {str(e)}")
             import traceback
             logger.error(traceback.format_exc())
             return False
-    
-    # Lanzar en thread daemon (muere con el proceso principal)
+
     thread = Thread(target=_send, daemon=True)
     thread.start()
-    
-    logger.info(f"🚀 Email encolado para {to_email} vía API HTTP")
+
+    logger.info(f"🚀 Email encolado para {to_email} vía Brevo API HTTP")
     return True
 
 
