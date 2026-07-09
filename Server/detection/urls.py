@@ -13,6 +13,7 @@ urlpatterns = [
     path('sw.js', push_views.service_worker, name='service_worker'),
     path('push/public_key/', push_views.public_key, name='push_public_key'),
     path('push/subscribe/', push_views.subscribe, name='push_subscribe'),
+    path('push/test/', push_views.test_push, name='push_test'),
     path('push/unsubscribe/', push_views.unsubscribe, name='push_unsubscribe'),
 
     # ✅ PASSWORD RESET con envío asíncrono (Gmail SMTP)

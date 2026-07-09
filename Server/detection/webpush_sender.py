@@ -14,24 +14,32 @@ from .models import PushSubscription
 logger = logging.getLogger(__name__)
 
 
-def send_push_to_user(user, payload: dict) -> int:
+def send_push_to_user(user, payload: dict) -> dict:
     """
     Envía una notificación push a todas las suscripciones de `user`.
-    Devuelve el número de envíos correctos.
+
+    Devuelve un diccionario de diagnóstico:
+      {"ok": bool, "subscriptions": int, "sent": int, "errors": [str, ...],
+       "reason": str}
+    `reason` explica por qué no se envió nada cuando `sent` es 0.
     """
     if not settings.VAPID_PRIVATE_KEY or not settings.VAPID_PUBLIC_KEY:
         logger.warning("⚠️ VAPID no configurado: se omite el envío de push.")
-        return 0
+        return {"ok": False, "subscriptions": 0, "sent": 0, "errors": [],
+                "reason": "VAPID no configurado en el servidor (faltan VAPID_PUBLIC_KEY/VAPID_PRIVATE_KEY)."}
 
     # Import diferido para no romper el arranque si la librería no está instalada.
     try:
         from pywebpush import webpush, WebPushException
     except ImportError:
         logger.error("❌ pywebpush no está instalado; no se envían notificaciones push.")
-        return 0
+        return {"ok": False, "subscriptions": 0, "sent": 0, "errors": [],
+                "reason": "La librería pywebpush no está instalada en el servidor."}
 
-    subscriptions = PushSubscription.objects.filter(user=user)
+    subscriptions = list(PushSubscription.objects.filter(user=user))
+    total = len(subscriptions)
     sent = 0
+    errors = []
 
     for sub in subscriptions:
         try:
@@ -51,13 +59,24 @@ def send_push_to_user(user, payload: dict) -> int:
                 # Suscripción muerta: eliminar.
                 logger.info("🧹 Suscripción push caducada eliminada (%s).", status)
                 sub.delete()
+                errors.append(f"Suscripción caducada eliminada ({status}).")
             else:
                 logger.error("❌ Error enviando push: %s", exc)
+                errors.append(f"HTTP {status}: {exc}")
         except Exception as exc:  # noqa: BLE001 - no debe interrumpir la alerta
             logger.error("❌ Error inesperado enviando push: %s", exc)
+            errors.append(str(exc))
 
-    logger.info("🔔 Push enviadas a %s: %s/%s", user.username, sent, subscriptions.count())
-    return sent
+    logger.info("🔔 Push enviadas a %s: %s/%s", user.username, sent, total)
+
+    reason = ""
+    if total == 0:
+        reason = "El usuario no tiene ninguna suscripción push registrada (¿pulsaste 'Activar notificaciones' en este navegador?)."
+    elif sent == 0:
+        reason = "Había suscripciones pero ningún envío tuvo éxito. Revisa 'errors'."
+
+    return {"ok": sent > 0, "subscriptions": total, "sent": sent,
+            "errors": errors, "reason": reason}
 
 
 def notify_alert_owner(alert_instance):

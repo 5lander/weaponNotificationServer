@@ -77,6 +77,9 @@
 
       if (resp.ok) {
         setButtonState(btn, '✅ Notificaciones activas', true);
+        // Disparar una notificación de PRUEBA inmediata para confirmar que
+        // toda la cadena (permiso + service worker + envío) funciona.
+        await sendTestPush();
       } else {
         setButtonState(btn, '🔔 Activar notificaciones', false);
         alert('No se pudo registrar la suscripción en el servidor.');
@@ -85,6 +88,32 @@
       console.error('Error al activar notificaciones push:', err);
       setButtonState(btn, '🔔 Activar notificaciones', false);
       alert('Ocurrió un error al activar las notificaciones.');
+    }
+  }
+
+  // Pide al servidor que envíe una notificación de prueba al usuario actual.
+  // Muestra el diagnóstico real si algo falla en el lado del envío.
+  async function sendTestPush() {
+    try {
+      const resp = await fetch('/push/test/', {
+        method: 'POST',
+        headers: { 'X-CSRFToken': getCookie('csrftoken') }
+      });
+      const data = await resp.json().catch(function () { return {}; });
+      if (resp.ok && data.ok) {
+        // La notificación debería aparecer en segundos. No alertamos para no
+        // tapar la propia notificación del sistema.
+        console.info('Push de prueba enviada:', data);
+      } else {
+        console.warn('Push de prueba falló:', data);
+        var motivo = data.reason || 'Error desconocido en el servidor.';
+        if (data.errors && data.errors.length) {
+          motivo += '\n\nDetalle: ' + data.errors.join(' | ');
+        }
+        alert('Las notificaciones se registraron, pero la prueba de envío falló:\n\n' + motivo);
+      }
+    } catch (e) {
+      console.error('No se pudo enviar la push de prueba:', e);
     }
   }
 
