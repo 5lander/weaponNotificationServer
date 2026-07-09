@@ -386,20 +386,20 @@ def generate_alert_url(image_path):
         if filename:
             name_without_extension = os.path.splitext(filename)[0]
             if name_without_extension:
-                return f'https://weaponnotificationserver.onrender.com/alert/{name_without_extension}'
+                return f'http://127.0.0.1/alert/{name_without_extension}'
         
         # Respaldo al método original
         parts_by_dot = str(image_path).split(".")
         if len(parts_by_dot) >= 4:
             parts_by_slash = str(parts_by_dot[3]).split("/")
             if len(parts_by_slash) >= 3:
-                return f'https://weaponnotificationserver.onrender.com/alert/{parts_by_slash[2]}'
+                return f'http://127.0.0.1/alert/{parts_by_slash[2]}'
         
-        return 'https://weaponnotificationserver.onrender.com/alert/processing'
+        return 'http://127.0.0.1/alert/processing'
         
     except Exception as e:
         print(f"Error al generar URL de alerta: {e}")
-        return 'https://weaponnotificationserver.onrender.com/alert/error'
+        return 'http://127.0.0.1/alert/error'
 
 def split(value, key):
     return str(value).split(key)
