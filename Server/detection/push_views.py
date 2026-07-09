@@ -56,6 +56,28 @@ def subscribe(request):
 
 @login_required(login_url='login')
 @require_POST
+def test_push(request):
+    """
+    Envía una notificación push de PRUEBA al propio usuario autenticado.
+
+    Sirve para verificar de extremo a extremo que la suscripción de este
+    navegador funciona, sin depender de que el cliente de escritorio suba una
+    alerta. Devuelve el diagnóstico real (suscripciones, envíos, errores).
+    """
+    from .webpush_sender import send_push_to_user
+
+    result = send_push_to_user(request.user, {
+        "title": "🔔 Notificación de prueba",
+        "body": "Si ves esto, las notificaciones funcionan correctamente.",
+        "url": "/",
+        "tag": "weapon-test",
+    })
+    status = 200 if result.get("ok") else 502
+    return JsonResponse(result, status=status)
+
+
+@login_required(login_url='login')
+@require_POST
 def unsubscribe(request):
     """Elimina la suscripción push por su endpoint."""
     try:
