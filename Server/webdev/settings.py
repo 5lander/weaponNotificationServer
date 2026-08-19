@@ -175,6 +175,10 @@ LOGGING = {
     },
 }
 
+# Clave primaria por defecto: AutoField explicito para silenciar la advertencia
+# W042 sin alterar el esquema existente (las tablas ya usan AutoField).
+DEFAULT_AUTO_FIELD = 'django.db.models.AutoField'
+
 # Static files
 STATIC_URL = '/static/'
 STATIC_ROOT = os.path.join(BASE_DIR,'staticfiles')
@@ -209,30 +213,28 @@ EMAIL_TIMEOUT = 30
 # envían por la API HTTP de Brevo (puerto 443). La API key empieza con 'xkeysib-'.
 # El remitente (DEFAULT_FROM_EMAIL) DEBE estar verificado en Brevo (Senders).
 BREVO_API_KEY = os.environ.get('BREVO_API_KEY', '')
-if not BREVO_API_KEY:
-    print("\n[!] BREVO_API_KEY no configurado - los correos NO se enviaran.\n")
-
-if not EMAIL_HOST_USER or not EMAIL_HOST_PASSWORD:
-    import warnings
-    warnings.warn(
-        "⚠️ Gmail no configurado. Los emails no se enviarán. "
-        "Agrega EMAIL_HOST_USER y EMAIL_HOST_PASSWORD a tu .env / Render.",
-        RuntimeWarning
-    )
+# Estado de la configuracion de correo: Brevo (API HTTP) es la via principal en
+# produccion (Render bloquea SMTP saliente); Gmail SMTP es el respaldo local.
+if BREVO_API_KEY:
     print("\n" + "="*60)
-    print("[X] CONFIGURACION DE GMAIL INCOMPLETA")
+    print("[OK] BREVO API CONFIGURADA (correos via API HTTP)")
     print("="*60)
-    print("Necesitas agregar a tu .env / Render:")
-    print("  EMAIL_HOST_USER=tu-correo@gmail.com")
-    print("  EMAIL_HOST_PASSWORD=app-password-de-16-caracteres")
+    print(f"   From Email: {DEFAULT_FROM_EMAIL}")
     print("="*60 + "\n")
-else:
+elif EMAIL_HOST_USER and EMAIL_HOST_PASSWORD:
     print("\n" + "="*60)
     print("[OK] GMAIL SMTP CONFIGURADO")
     print("="*60)
     print(f"   From Email: {DEFAULT_FROM_EMAIL}")
     print(f"   SMTP Host: {EMAIL_HOST}:{EMAIL_PORT}")
     print("="*60 + "\n")
+else:
+    import warnings
+    warnings.warn(
+        "Correo no configurado: los emails no se enviaran. Agrega BREVO_API_KEY "
+        "(produccion) o EMAIL_HOST_USER y EMAIL_HOST_PASSWORD (local) a tu .env / Render.",
+        RuntimeWarning
+    )
 
 # Amazon S3 Configuration
 AWS_ACCESS_KEY_ID = os.environ['AWS_ACCESS_KEY_ID']
