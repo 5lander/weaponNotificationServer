@@ -1,6 +1,4 @@
 from django.shortcuts import render, redirect
-from django.http import HttpResponse
-from django.contrib.auth.forms import UserCreationForm
 
 from django.contrib.auth import authenticate, login, logout
 from django.contrib import messages
@@ -12,7 +10,6 @@ from .filters import DetectionFilter
 from .models import UploadAlert
 
 from rest_framework.authtoken.models import Token
-from django.conf import settings
 from django.core.paginator import Paginator
 
 

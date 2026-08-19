@@ -1,10 +1,6 @@
 from alertuploadREST.serializers import UploadAlertSerializer
 from rest_framework.response import Response
-from rest_framework.decorators import api_view, permission_classes
-from rest_framework.permissions import IsAuthenticated
-from django.http import HttpResponse
-from django.core.mail import send_mail, EmailMultiAlternatives
-from rest_framework.exceptions import ValidationError
+from rest_framework.decorators import api_view
 
 from django.http import JsonResponse
 
@@ -78,7 +74,7 @@ def send_enhanced_email(serializer):
         alert_data = extract_alert_data(serializer)
 
         # Crear el correo con HTML
-        subject = f"🚨 ALERTA DE SEGURIDAD - Arma Detectada"
+        subject = "🚨 ALERTA DE SEGURIDAD - Arma Detectada"
 
         # Texto plano como respaldo
         text_content = create_text_email(alert_data)
@@ -88,7 +84,7 @@ def send_enhanced_email(serializer):
 
         receiver = serializer.data['alertReceiver']
 
-        print(f"Detalles del correo:")
+        print("Detalles del correo:")
         print(f"  Asunto: {subject}")
         print(f"  Para: {receiver}")
         print(f"  De: {settings.DEFAULT_FROM_EMAIL}")
@@ -386,20 +382,20 @@ def generate_alert_url(image_path):
         if filename:
             name_without_extension = os.path.splitext(filename)[0]
             if name_without_extension:
-                return f'http://127.0.0.1/alert/{name_without_extension}'
+                return f'https://weaponnotificationserver.onrender.com/alert/{name_without_extension}'
         
         # Respaldo al método original
         parts_by_dot = str(image_path).split(".")
         if len(parts_by_dot) >= 4:
             parts_by_slash = str(parts_by_dot[3]).split("/")
             if len(parts_by_slash) >= 3:
-                return f'http://127.0.0.1/alert/{parts_by_slash[2]}'
+                return f'https://weaponnotificationserver.onrender.com/alert/{parts_by_slash[2]}'
         
-        return 'http://127.0.0.1/alert/processing'
+        return 'https://weaponnotificationserver.onrender.com/alert/processing'
         
     except Exception as e:
         print(f"Error al generar URL de alerta: {e}")
-        return 'http://127.0.0.1/alert/error'
+        return 'https://weaponnotificationserver.onrender.com/alert/error'
 
 def split(value, key):
-    return str(value).split(key)
+    return str(value).split(key)

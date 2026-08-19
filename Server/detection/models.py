@@ -1,4 +1,3 @@
-import os
 import uuid
 from django.db import models
 
@@ -9,7 +8,6 @@ from rest_framework.authtoken.models import Token
 
 from django.contrib.auth.models import User
 from webdev.storage_backends import PublicMediaStorage
-from django.conf import settings
 
 # Changes uploaded file name
 def scrambleUploadedFilename(instance, filename):
@@ -49,4 +47,4 @@ class PushSubscription(models.Model):
     created = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
-        return f"PushSubscription({self.user.username})"
+        return f"PushSubscription({self.user.username})"
