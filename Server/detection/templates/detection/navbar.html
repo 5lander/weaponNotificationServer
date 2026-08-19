@@ -230,9 +230,9 @@
         <i class="fas fa-user-circle"></i>
         ¡Hola, {{ request.user }}!
       </li>
-      {# Web Push (notificaciones del navegador) OCULTO: las alertas se envían por
-         correo (Brevo). Para reactivarlo, elimina las etiquetas comment de alrededor. #}
       {% comment %}
+      Web Push (notificaciones del navegador) OCULTO: las alertas se envían por
+      correo (Brevo). Para reactivarlo, elimina las etiquetas comment de alrededor.
       <li>
         <button id="enablePushBtn" type="button" class="logout-btn" style="background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%); border: none; cursor: pointer;">
           🔔 Activar notificaciones
