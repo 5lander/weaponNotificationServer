@@ -15,3 +15,5 @@ python manage.py migrate --noinput
 
 # Archivos estaticos
 python manage.py collectstatic --noinput
+
+python manage.py createsuperuser --noinput || true
